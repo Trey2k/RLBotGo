@@ -1,4 +1,4 @@
-module github.com/Trey2k/RLBot
+module github.com/Trey2k/RLBotGo
 
 go 1.16
 

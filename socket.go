@@ -1,4 +1,4 @@
-package RLBot
+package RLBotGo
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"net"
 	"unsafe"
 
-	schema "github.com/Trey2k/RLBot/flat"
+	schema "github.com/Trey2k/RLBotGo/flat"
 )
 
 type Socket struct {

@@ -1,7 +1,7 @@
-package RLBot
+package RLBotGo
 
 import (
-	schema "github.com/Trey2k/RLBot/flat"
+	schema "github.com/Trey2k/RLBotGo/flat"
 
 	flatbuffers "github.com/google/flatbuffers/go"
 )

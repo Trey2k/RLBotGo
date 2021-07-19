@@ -1,4 +1,4 @@
-package RLBot
+package RLBotGo
 
 // CONSTS
 
