@@ -47,6 +47,142 @@ func (gameTickPack *GameTickPacket) unmarshal(flatGameTickPack *schema.GameTickP
 	}
 }
 
+func (fieldInfo *FieldInfo) unmarshal(flatFieldInfo *schema.FieldInfo) {
+	flatBoostPad := &schema.BoostPad{}
+	for i := 0; i < flatFieldInfo.BoostPadsLength(); i++ {
+		flatFieldInfo.BoostPads(flatBoostPad, i)
+		var vec3 Vector3
+		flatVec3 := &schema.Vector3{}
+		vec3.unmarshal(flatBoostPad.Location(flatVec3))
+		fieldInfo.BoostPads = append(fieldInfo.BoostPads, BoostPad{
+			Location:    vec3,
+			IsFullBoost: flatBoostPad.IsFullBoost() == 1,
+		})
+	}
+
+	flatGoal := &schema.GoalInfo{}
+	for i := 0; i < flatFieldInfo.GoalsLength(); i++ {
+		flatFieldInfo.Goals(flatGoal, i)
+		var location Vector3
+		var direction Vector3
+		flatVec3 := &schema.Vector3{}
+		location.unmarshal(flatGoal.Location(flatVec3))
+		direction.unmarshal(flatGoal.Direction(flatVec3))
+		fieldInfo.Goals = append(fieldInfo.Goals, GoalInfo{
+			TeamNum:   flatGoal.TeamNum(),
+			Location:  location,
+			Direction: direction,
+			Width:     flatGoal.Width(),
+			Height:    flatGoal.Height(),
+		})
+	}
+}
+
+func (ballPrediction *BallPrediction) unmarshal(flatBallPrediction *schema.BallPrediction) {
+	flatPredictionSlice := &schema.PredictionSlice{}
+	for i := 0; i < flatBallPrediction.SlicesLength(); i++ {
+		flatBallPrediction.Slices(flatPredictionSlice, i)
+		var physics Physics
+		//flatPhysics := &schema.Physics{}
+		//physics.unmarshal(flatPredictionSlice.Physics(flatPhysics))
+		ballPrediction.Slices = append(ballPrediction.Slices, PredictionSlice{
+			GameSeconds: flatPredictionSlice.GameSeconds(),
+			Physics:     physics,
+		})
+	}
+}
+
+func (matchSettings *MatchSettings) unmarshal(flatMatchSettings *schema.MatchSettings) {
+
+	matchSettings.GameMode = flatMatchSettings.GameMode()
+	matchSettings.GameMap = flatMatchSettings.GameMap()
+	matchSettings.ExistingMatchBehavior = flatMatchSettings.ExistingMatchBehavior()
+
+	matchSettings.SkipReplays = flatMatchSettings.SkipReplays() == 1
+	matchSettings.InstantStart = flatMatchSettings.InstantStart() == 1
+	matchSettings.EnableLockstep = flatMatchSettings.EnableLockstep() == 1
+	matchSettings.EnableRendering = flatMatchSettings.EnableRendering() == 1
+	matchSettings.EnableStateSetting = flatMatchSettings.EnableStateSetting() == 1
+	matchSettings.AutoSaveReplay = flatMatchSettings.AutoSaveReplay() == 1
+
+	matchSettings.GameMapUpk = string(flatMatchSettings.GameMapUpk())
+
+	matchSettings.MutatorSettings.unmarshal(flatMatchSettings.MutatorSettings(&schema.MutatorSettings{}))
+
+	flatPlayerConfig := &schema.PlayerConfiguration{}
+	for i := 0; i < flatMatchSettings.PlayerConfigurationsLength(); i++ {
+		flatMatchSettings.PlayerConfigurations(flatPlayerConfig, i)
+		temp := PlayerConfiguration{}
+		temp.unmarshal(flatPlayerConfig)
+		matchSettings.PlayerConfigurations = append(matchSettings.PlayerConfigurations, temp)
+	}
+}
+
+func (mutatorSettings *MutatorSettings) unmarshal(flatMutatorSettings *schema.MutatorSettings) {
+	mutatorSettings.MatchLength = flatMutatorSettings.MatchLength()
+	mutatorSettings.MaxScore = flatMutatorSettings.MaxScore()
+	mutatorSettings.OvertimeOption = flatMutatorSettings.OvertimeOption()
+	mutatorSettings.SeriesLengthOption = flatMutatorSettings.SeriesLengthOption()
+	mutatorSettings.GameSpeedOption = flatMutatorSettings.GameSpeedOption()
+	mutatorSettings.BallMaxSpeedOption = flatMutatorSettings.BallMaxSpeedOption()
+	mutatorSettings.BallTypeOption = flatMutatorSettings.BallTypeOption()
+	mutatorSettings.BallWeightOption = flatMutatorSettings.BallWeightOption()
+	mutatorSettings.BallSizeOption = flatMutatorSettings.BallSizeOption()
+	mutatorSettings.BallBouncinessOption = flatMutatorSettings.BallBouncinessOption()
+	mutatorSettings.BoostOption = flatMutatorSettings.BoostOption()
+	mutatorSettings.RumbleOption = flatMutatorSettings.RumbleOption()
+	mutatorSettings.BoostStrengthOption = flatMutatorSettings.BoostStrengthOption()
+	mutatorSettings.GravityOption = flatMutatorSettings.GravityOption()
+	mutatorSettings.DemolishOption = flatMutatorSettings.DemolishOption()
+	mutatorSettings.RespawnTimeOption = flatMutatorSettings.RespawnTimeOption()
+
+}
+
+func (playerConfig *PlayerConfiguration) unmarshal(flatPlayerConfig *schema.PlayerConfiguration) {
+	playerConfig.Name = string(flatPlayerConfig.Name())
+	playerConfig.Team = flatPlayerConfig.Team()
+	playerConfig.SpawnId = flatPlayerConfig.SpawnId()
+	playerConfig.Loadout.unmarshal(flatPlayerConfig.Loadout(&schema.PlayerLoadout{}))
+
+}
+
+func (playerLoadout *PlayerLoadout) unmarshal(flatPlayerLoadout *schema.PlayerLoadout) {
+	playerLoadout.TeamColorId = flatPlayerLoadout.TeamColorId()
+	playerLoadout.CustomColorId = flatPlayerLoadout.CustomColorId()
+	playerLoadout.CarId = flatPlayerLoadout.CarId()
+	playerLoadout.DecalId = flatPlayerLoadout.DecalId()
+	playerLoadout.WheelsId = flatPlayerLoadout.WheelsId()
+	playerLoadout.BoostId = flatPlayerLoadout.BoostId()
+	playerLoadout.AntennaId = flatPlayerLoadout.AntennaId()
+	playerLoadout.HatId = flatPlayerLoadout.HatId()
+	playerLoadout.PaintFinishId = flatPlayerLoadout.PaintFinishId()
+	playerLoadout.CustomFinishId = flatPlayerLoadout.CustomFinishId()
+	playerLoadout.EngineAudioId = flatPlayerLoadout.EngineAudioId()
+	playerLoadout.TrailsId = flatPlayerLoadout.TrailsId()
+	playerLoadout.GoalExplosionId = flatPlayerLoadout.GoalExplosionId()
+	playerLoadout.LoadoutPaint.unmarshal(flatPlayerLoadout.LoadoutPaint(&schema.LoadoutPaint{}))
+	playerLoadout.PrimaryColorLookup.unmarshal(flatPlayerLoadout.PrimaryColorLookup(&schema.Color{}))
+	playerLoadout.SecondaryColorLookup.unmarshal(flatPlayerLoadout.SecondaryColorLookup(&schema.Color{}))
+}
+
+func (loadoutPaint *LoadoutPaint) unmarshal(flatLoadoutPaint *schema.LoadoutPaint) {
+	loadoutPaint.CarPaintId = flatLoadoutPaint.CarPaintId()
+	loadoutPaint.DecalPaintId = flatLoadoutPaint.DecalPaintId()
+	loadoutPaint.WheelsPaintId = flatLoadoutPaint.WheelsPaintId()
+	loadoutPaint.BoostPaintId = flatLoadoutPaint.BoostPaintId()
+	loadoutPaint.AntennaPaintId = flatLoadoutPaint.AntennaPaintId()
+	loadoutPaint.HatPaintId = flatLoadoutPaint.HatPaintId()
+	loadoutPaint.TrailsPaintId = flatLoadoutPaint.TrailsPaintId()
+	loadoutPaint.GoalExplosionPaintId = flatLoadoutPaint.GoalExplosionPaintId()
+}
+
+func (color *Color) unmarshal(flatColor *schema.Color) {
+	color.A = flatColor.A()
+	color.R = flatColor.R()
+	color.G = flatColor.G()
+	color.B = flatColor.B()
+}
+
 func (playerInfo *PlayerInfo) unmarshal(flatPlayerInfo *schema.PlayerInfo) {
 	playerInfo.Boost = flatPlayerInfo.Boost()
 	playerInfo.DoubleJumped = flatPlayerInfo.DoubleJumped() == 1

@@ -1,143 +1,57 @@
 package RLBotGo
 
-// CONSTS
+type GameState struct {
+	GameTick       *GameTickPacket
+	BallPrediction *BallPrediction
 
-const ( // Dropshot tile info const
-	Unkown  = 0
-	Filled  = 1
-	Damaged = 2
-	Open    = 3
-)
+	MatchSettigns   *MatchSettings
+	MatchSettingsOK bool
+	FieldInfo       *FieldInfo
+	FieldInfoOK     bool
+}
 
-const (
-	DataType_TickPacket = iota + 1
-	DataType_FieldInfo
-	DataType_MatchSettings
-	DataType_PlayerInput
-	// Depercated!!!
-	DataType_ActorMapping
-	// Depercated!!!
-	DataType_ComputerId
-	DataType_DesiredGameState
-	DataType_RenderGroup
-	DataType_QuickChat
-	DataType_BallPrediction
-	DataType_ReadyMessage
-	DataType_MessagePacket
-)
+type PredictionSlice struct {
+	// The moment in game time that this prediction corresponds to.
+	// This corresponds to 'secondsElapsed' in the GameInfo table.
+	GameSeconds float32
 
-const (
-	Information_IGotIt      = 0
-	Information_NeedBoost   = 1
-	Information_TakeTheShot = 2
-	Information_Defending   = 3
-	Information_GoForIt     = 4
-	Information_Centering   = 5
-	Information_AllYours    = 6
-	Information_InPosition  = 7
-	Information_Incoming    = 8
-	Compliments_NiceShot    = 9
-	Compliments_GreatPass   = 10
-	Compliments_Thanks      = 11
-	Compliments_WhatASave   = 12
-	Compliments_NiceOne     = 13
-	Compliments_WhatAPlay   = 14
-	Compliments_GreatClear  = 15
-	Compliments_NiceBlock   = 16
-	Reactions_OMG           = 17
-	Reactions_Noooo         = 18
-	Reactions_Wow           = 19
-	Reactions_CloseOne      = 20
-	Reactions_NoWay         = 21
-	Reactions_HolyCow       = 22
-	Reactions_Whew          = 23
-	Reactions_Siiiick       = 24
-	Reactions_Calculated    = 25
-	Reactions_Savage        = 26
-	Reactions_Okay          = 27
-	Apologies_Cursing       = 28
-	Apologies_NoProblem     = 29
-	Apologies_Whoops        = 30
-	Apologies_Sorry         = 31
-	Apologies_MyBad         = 32
-	Apologies_Oops          = 33
-	Apologies_MyFault       = 34
-	PostGame_Gg             = 35
-	PostGame_WellPlayed     = 36
-	PostGame_ThatWasFun     = 37
-	PostGame_Rematch        = 38
-	PostGame_OneMoreGame    = 39
-	PostGame_WhatAGame      = 40
-	PostGame_NiceMoves      = 41
-	PostGame_EverybodyDance = 42
-	/// Custom text chats made by bot makers
-	MaxPysonixQuickChatPresets = 43
-	/// Waste of CPU cycles
-	Custom_Toxic_WasteCPU = 44
-	/// Git gud*
-	Custom_Toxic_GitGut = 45
-	/// De-Allocate Yourself
-	Custom_Toxic_DeAlloc = 46
-	/// 404: Your skill not found
-	Custom_Toxic_404NoSkill = 47
-	/// Get a virus
-	Custom_Toxic_CatchVirus = 48
-	/// Passing!
-	Custom_Useful_Passing = 49
-	/// Faking!
-	Custom_Useful_Faking = 50
-	/// Demoing!
-	Custom_Useful_Demoing = 51
-	/// BOOPING
-	Custom_Useful_Bumping = 52
-	/// The chances of that was 47525 to 1*
-	Custom_Compliments_TinyChances = 53
-	/// Who upped your skill level?
-	Custom_Compliments_SkillLevel = 54
-	/// Your programmer should be proud
-	Custom_Compliments_proud = 55
-	/// You're the GC of Bots
-	Custom_Compliments_GC = 56
-	/// Are you <Insert Pro>Bot? *
-	Custom_Compliments_Pro = 57
-	/// Lag
-	Custom_Excuses_Lag = 58
-	/// Ghost inputs
-	Custom_Excuses_GhostInputs = 59
-	/// RIGGED
-	Custom_Excuses_Rigged = 60
-	/// Mafia plays!
-	Custom_Toxic_MafiaPlays = 61
-	/// Yeet!
-	Custom_Exclamation_Yeet = 62
-)
+	// The predicted location and motion of the object.
+	Physics Physics
+}
+
+type BallPrediction struct {
+	// A list of places the ball will be at specific times in the future.
+	// It is guaranteed to sorted so that time increases with each slice.
+	// It is NOT guaranteed to have a consistent amount of time between slices.
+	Slices []PredictionSlice
+}
 
 type ControllerState struct {
-	/// -1 for full reverse, 1 for full forward
+	// -1 for full reverse, 1 for full forward
 	Throttle float32
 
-	/// -1 for full left, 1 for full right
+	// -1 for full left, 1 for full right
 	Steer float32
 
-	/// -1 for nose down, 1 for nose up
+	// -1 for nose down, 1 for nose up
 	Pitch float32
 
-	/// -1 for full left, 1 for full right
+	// -1 for full left, 1 for full right
 	Yaw float32
 
-	/// -1 for roll left, 1 for roll right
+	// -1 for roll left, 1 for roll right
 	Roll float32
 
-	/// true if you want to press the jump button
+	// true if you want to press the jump button
 	Jump bool
 
-	/// true if you want to press the boost button
+	// true if you want to press the boost button
 	Boost bool
 
-	/// true if you want to press the handbrake button
+	// true if you want to press the handbrake button
 	Handbrake bool
 
-	/// true if you want to press the 'use item' button, used in rumble etc.
+	// true if you want to press the 'use item' button, used in rumble etc.
 	UseItem bool
 }
 
@@ -156,6 +70,116 @@ type PlayerInputChange struct {
 	DodgeRight   float32
 }
 
+type PlayerClass struct {
+	Type     int
+	BotSkill float64
+}
+
+type PlayerLoadout struct {
+	TeamColorId     int32
+	CustomColorId   int32
+	CarId           int32
+	DecalId         int32
+	WheelsId        int32
+	BoostId         int32
+	AntennaId       int32
+	HatId           int32
+	PaintFinishId   int32
+	CustomFinishId  int32
+	EngineAudioId   int32
+	TrailsId        int32
+	GoalExplosionId int32
+	LoadoutPaint    LoadoutPaint
+	// Sets the primary color of the car to the swatch that most closely matches the provided
+	// RGB color value. If set, this overrides teamColorId.
+	PrimaryColorLookup Color
+	// Sets the secondary color of the car to the swatch that most closely matches the provided
+	// RGB color value. If set, this overrides customColorId.
+	SecondaryColorLookup Color
+}
+
+type LoadoutPaint struct {
+	CarPaintId           int32
+	DecalPaintId         int32
+	WheelsPaintId        int32
+	BoostPaintId         int32
+	AntennaPaintId       int32
+	HatPaintId           int32
+	TrailsPaintId        int32
+	GoalExplosionPaintId int32
+}
+
+type Color struct {
+	A uint8
+	R uint8
+	G uint8
+	B uint8
+}
+
+type PlayerConfiguration struct {
+	// Cannot be named 'class' because that breaks Java.
+	// Cannot be named 'playerClass' because that breaks C#.
+	Variety PlayerClass
+	Name    string
+	Team    int32
+	Loadout PlayerLoadout
+	// In the case where the requested player index is not available, spawnId will help
+	// the framework figure out what index was actually assigned to this player instead.
+	SpawnId int32
+}
+
+type MutatorSettings struct {
+	MatchLength          int8
+	MaxScore             int8
+	OvertimeOption       int8
+	SeriesLengthOption   int8
+	GameSpeedOption      int8
+	BallMaxSpeedOption   int8
+	BallTypeOption       int8
+	BallWeightOption     int8
+	BallSizeOption       int8
+	BallBouncinessOption int8
+	BoostOption          int8
+	RumbleOption         int8
+	BoostStrengthOption  int8
+	GravityOption        int8
+	DemolishOption       int8
+	RespawnTimeOption    int8
+}
+
+type MatchSettings struct {
+	PlayerConfigurations  []PlayerConfiguration
+	GameMode              int8
+	GameMap               int8
+	SkipReplays           bool
+	InstantStart          bool
+	MutatorSettings       MutatorSettings
+	ExistingMatchBehavior int8
+	EnableLockstep        bool
+	EnableRendering       bool
+	EnableStateSetting    bool
+	AutoSaveReplay        bool
+	// The name of a upk file, like UtopiaStadium_P, which should be loaded.
+	// If specified, this overrides gameMap. On Steam version of Rocket League,
+	// this can be used to load custom map files, but on Epic version it only
+	// works on the Psyonix maps. Still useful because maintaining the gameMap
+	// enum as new Psyonix maps are added is annoying.
+	GameMapUpk string
+}
+
+type GoalInfo struct {
+	TeamNum   int32
+	Location  Vector3
+	Direction Vector3
+	Width     float32
+	Height    float32
+}
+
+type FieldInfo struct {
+	BoostPads []BoostPad // These will be sorted according to (y * 100 + x), and BoostInfo will be provided in the same order.
+	Goals     []GoalInfo
+}
+
 type ReadyMessage struct {
 	// If this is set, RLBot will send BallPrediction data back to the client when available.
 	WantsBallPredictions bool
@@ -168,10 +192,10 @@ type ReadyMessage struct {
 type QuickChat struct {
 	QuickChatSelection int8
 
-	/// The index of the player that sent the quick chat
+	// The index of the player that sent the quick chat
 	PlayerIndex int32
 
-	/// True if the chat is team only false if everyone can see it.
+	// True if the chat is team only false if everyone can see it.
 	TeamOnly bool
 
 	MessageIndex int32
@@ -219,30 +243,35 @@ type ScoreInfo struct {
 }
 
 type BoostPadState struct {
-	/// True if the boost can be picked up
+	// True if the boost can be picked up
 	IsActive bool
 
-	/// The number of seconds since the boost has been picked up, or 0.0 if the boost is active.
+	// The number of seconds since the boost has been picked up, or 0.0 if the boost is active.
 	Timer float32
 }
 
+type BoostPad struct {
+	Location    Vector3
+	IsFullBoost bool
+}
+
 type Touch struct {
-	/// The name of the player involved with the touch.
+	// The name of the player involved with the touch.
 	PlayerName string
 
-	/// Seconds that had elapsed in the game when the touch occurred.
+	// Seconds that had elapsed in the game when the touch occurred.
 	GameSeconds float32
 
-	/// The point32 of contact for the touch.
+	// The point32 of contact for the touch.
 	Location Vector3
 
-	/// The direction of the touch.
+	// The direction of the touch.
 	Normal Vector3
 
-	/// The Team which the touch belongs to, 0 for blue 1 for orange.
+	// The Team which the touch belongs to, 0 for blue 1 for orange.
 	Team int32
 
-	/// The index of the player involved with the touch.
+	// The index of the player involved with the touch.
 	PlayerIndex int32
 }
 
@@ -253,7 +282,7 @@ type DropShotBallInfo struct {
 }
 
 type DropshotTile struct {
-	/// The amount of damage the tile has sustained.
+	// The amount of damage the tile has sustained.
 	TileState int8
 }
 
@@ -268,22 +297,22 @@ type PlayerInfo struct {
 	Physics      Physics
 	ScoreInfo    ScoreInfo
 	IsDemolished bool
-	/// True if your wheels are on the ground, the wall, or the ceiling. False if you're midair or turtling.
+	// True if your wheels are on the ground, the wall, or the ceiling. False if you're midair or turtling.
 	HasWheelContact bool
 	IsSupersonic    bool
 	IsBot           bool
-	/// True if the player has jumped. Falling off the ceiling / driving off the goal post does not count.
+	// True if the player has jumped. Falling off the ceiling / driving off the goal post does not count.
 	Jumped bool
-	///  True if player has double jumped. False does not mean you have a jump remaining, because the
-	///  aerial timer can run out, and that doesn't affect this flag.
+	//  True if player has double jumped. False does not mean you have a jump remaining, because the
+	//  aerial timer can run out, and that doesn't affect this flag.
 	DoubleJumped bool
 	Name         string
 	Team         int32
 	Boost        int32
 	Hitbox       BoxShape
 	HitboxOffset Vector3
-	/// In the case where the requested player index is not available, spawnId will help
-	/// the framework figure out what index was actually assigned to this player instead.
+	// In the case where the requested player index is not available, spawnId will help
+	// the framework figure out what index was actually assigned to this player instead.
 	SpawnId int32
 }
 
@@ -292,26 +321,26 @@ type GameInfo struct {
 	GameTimeRemaining float32
 	IsOvertime        bool
 	IsUnlimitedTime   bool
-	/// True when cars are allowed to move, and during the pause menu. False during replays.
+	// True when cars are allowed to move, and during the pause menu. False during replays.
 	IsRoundActive bool
-	/// True when the clock is paused due to kickoff, but false during kickoff countdown. In other words, it is true
-	/// while cars can move during kickoff. Note that if both players sit still, game clock start and this will become false.
+	// True when the clock is paused due to kickoff, but false during kickoff countdown. In other words, it is true
+	// while cars can move during kickoff. Note that if both players sit still, game clock start and this will become false.
 	IsKickoffPause bool
-	/// Turns true after final replay, the moment the 'winner' screen appears. Remains true during next match
-	/// countdown. Turns false again the moment the 'choose team' screen appears.
+	// Turns true after final replay, the moment the 'winner' screen appears. Remains true during next match
+	// countdown. Turns false again the moment the 'choose team' screen appears.
 	IsMatchEnded  bool
 	WorldGravityZ float32
-	/// Game speed multiplier, 1.0 is regular game speed.
+	// Game speed multiplier, 1.0 is regular game speed.
 	GameSpeed float32
-	/// Tracks the number of physics frames the game has computed.
-	/// May increase by more than one across consecutive packets.
-	/// Data type will roll over after 207 days at 120Hz.
+	// Tracks the number of physics frames the game has computed.
+	// May increase by more than one across consecutive packets.
+	// Data type will roll over after 207 days at 120Hz.
 	FrameNum int32
 }
 
 type TeamInfo struct {
 	TeamIndex int32
-	/// number of goals scored.
+	// number of goals scored.
 	Score int32
 }
 

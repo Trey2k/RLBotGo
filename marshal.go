@@ -6,13 +6,7 @@ import (
 	flatbuffers "github.com/google/flatbuffers/go"
 )
 
-var boolToByte = map[bool]byte{false: 0, true: 1} // should be in a utils file
-
-type rlData interface {
-	marshel() []byte
-}
-
-func (readyMsg *ReadyMessage) marshel() []byte {
+func (readyMsg *ReadyMessage) marshal() []byte {
 	builder := flatbuffers.NewBuilder(1024)
 	schema.ReadyMessageStart(builder)
 	schema.ReadyMessageAddWantsBallPredictions(builder, boolToByte[readyMsg.WantsBallPredictions])
@@ -24,9 +18,9 @@ func (readyMsg *ReadyMessage) marshel() []byte {
 	return builder.FinishedBytes()
 }
 
-func (playerInput *PlayerInput) marshel() []byte {
+func (playerInput *PlayerInput) marshal() []byte {
 	builder := flatbuffers.NewBuilder(1024)
-	//Controller State
+	// Controller State
 	schema.ControllerStateStart(builder)
 	schema.ControllerStateAddBoost(builder, boolToByte[playerInput.ControllerState.Boost])
 	schema.ControllerStateAddHandbrake(builder, boolToByte[playerInput.ControllerState.Handbrake])
@@ -40,17 +34,17 @@ func (playerInput *PlayerInput) marshel() []byte {
 	schema.ControllerStateAddThrottle(builder, playerInput.ControllerState.Throttle)
 	ControllerState := schema.ControllerStateEnd(builder)
 
-	//Player input
+	// Player input
 	schema.PlayerInputStart(builder)
 	schema.PlayerInputAddControllerState(builder, ControllerState)
 	schema.PlayerInputAddPlayerIndex(builder, playerInput.PlayerIndex)
-	msg := schema.ControllerStateEnd(builder)
+	msg := schema.PlayerInputEnd(builder)
 	builder.Finish(msg)
 
 	return builder.FinishedBytes()
 }
 
-func (quickChat *QuickChat) marshel() []byte {
+func (quickChat *QuickChat) marshal() []byte {
 	builder := flatbuffers.NewBuilder(1024)
 	schema.QuickChatStart(builder)
 	schema.QuickChatAddPlayerIndex(builder, quickChat.PlayerIndex)
@@ -58,7 +52,6 @@ func (quickChat *QuickChat) marshel() []byte {
 	schema.QuickChatAddTeamOnly(builder, boolToByte[quickChat.TeamOnly])
 	msg := schema.ReadyMessageEnd(builder)
 	builder.Finish(msg)
-	// Send ready message
 
 	return builder.FinishedBytes()
 }

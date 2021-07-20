@@ -1,27 +1,26 @@
 package RLBotGo
 
 import (
-	"bytes"
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"io"
 	"net"
-	"unsafe"
 
 	schema "github.com/Trey2k/RLBotGo/flat"
 )
 
 type Socket struct {
-	conn    net.Conn
-	binBuff *bytes.Buffer
+	conn net.Conn
+}
+
+type rlData interface {
+	marshal() []byte
 }
 
 func InitConnection(port int) (Socket, error) {
 	conn, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 	socket := Socket{
-		conn:    conn,
-		binBuff: new(bytes.Buffer),
+		conn: conn,
 	}
 	return socket, err
 }
@@ -30,28 +29,26 @@ func (socket *Socket) SendMessage(dataType uint16, data rlData) error {
 	dataTypePayload := make([]byte, 2)
 	binary.BigEndian.PutUint16(dataTypePayload, dataType)
 
+	payload := data.marshal()
+
 	size := make([]byte, 2)
-	binary.BigEndian.PutUint16(size, uint16(unsafe.Sizeof(data)))
+	binary.BigEndian.PutUint16(size, uint16(len(payload)))
 
 	bytes := append([]byte{}, dataTypePayload...)
 	bytes = append(bytes, size...)
 
-	bytes = append(bytes, data.marshel()...)
-	fmt.Println(bytes)
-	_, err := socket.binBuff.Write(bytes)
-	if err != nil {
-		return errors.New("rocket league is gay " + err.Error())
-	}
+	bytes = append(bytes, payload...)
 
-	// Big Penis In Town
-
-	_, err = socket.conn.Write(socket.binBuff.Bytes())
+	_, err := socket.conn.Write(bytes)
 	return err
 }
 
-func (socket *Socket) SetTickHandler(handler func(gameTick *GameTickPacket, socket *Socket)) error {
+func (socket *Socket) SetTickHandler(handler func(gameState *GameState, socket *Socket)) error {
 
-	payload := make([]byte, 4096) //Trey, Change me!
+	payload := make([]byte, 23504) //Trey, Change me!
+	gameState := &GameState{}
+	gameState.MatchSettingsOK = false
+	gameState.FieldInfoOK = false
 	for {
 
 		n, err := socket.conn.Read(payload)
@@ -62,18 +59,29 @@ func (socket *Socket) SetTickHandler(handler func(gameTick *GameTickPacket, sock
 			continue
 		}
 
-		switch binary.BigEndian.Uint16(payload[:2]) {
-		case 1:
+		dataType := binary.BigEndian.Uint16(payload[:2])
+
+		switch dataType {
+		case DataType_TickPacket:
 			flatGameTick := schema.GetRootAsGameTickPacket(payload, 4)
-			gameTick := &GameTickPacket{}
-			gameTick.unmarshal(flatGameTick)
-			handler(gameTick, socket)
-		case 2:
-
-		case 3:
-
-		case 4:
-
+			gameState.GameTick = &GameTickPacket{} // Restting to 0 values just in case
+			gameState.GameTick.unmarshal(flatGameTick)
+			handler(gameState, socket)
+		case DataType_FieldInfo:
+			faltFieldInfo := schema.GetRootAsFieldInfo(payload, 4)
+			gameState.FieldInfoOK = true
+			gameState.FieldInfo.unmarshal(faltFieldInfo)
+		case DataType_MatchSettings:
+			flatMatchSettings := schema.GetRootAsMatchSettings(payload, 4)
+			gameState.MatchSettingsOK = true
+			gameState.MatchSettigns.unmarshal(flatMatchSettings)
+			// TODO: Figure out why we are not sent MatchSettings
+		case DataType_BallPrediction:
+			flatBallPrediction := schema.GetRootAsBallPrediction(payload, 4)
+			flatPredictionSlice := &schema.PredictionSlice{}
+			flatBallPrediction.Slices(flatPredictionSlice, 0)
+			// gameState.BallPrediction.unmarshal(flatBallPrediction)
+			// TODO: Fix Ball predictions, faltbuffers fails GetRootAsBallPrediction for some reason
 		}
 	}
 
