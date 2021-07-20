@@ -50,40 +50,6 @@ func (playerInput *PlayerInput) marshel() []byte {
 	return builder.FinishedBytes()
 }
 
-func (playerInputChange *PlayerInputChange) marshel() []byte {
-	builder := flatbuffers.NewBuilder(1024)
-	//Controller State
-	schema.ControllerStateStart(builder)
-	schema.ControllerStateAddBoost(builder, boolToByte[playerInputChange.ControllerState.Boost])
-	schema.ControllerStateAddHandbrake(builder, boolToByte[playerInputChange.ControllerState.Handbrake])
-	schema.ControllerStateAddJump(builder, boolToByte[playerInputChange.ControllerState.Jump])
-	schema.ControllerStateAddUseItem(builder, boolToByte[playerInputChange.ControllerState.UseItem])
-
-	schema.ControllerStateAddPitch(builder, playerInputChange.ControllerState.Pitch)
-	schema.ControllerStateAddRoll(builder, playerInputChange.ControllerState.Roll)
-	schema.ControllerStateAddYaw(builder, playerInputChange.ControllerState.Yaw)
-	schema.ControllerStateAddSteer(builder, playerInputChange.ControllerState.Steer)
-	schema.ControllerStateAddThrottle(builder, playerInputChange.ControllerState.Throttle)
-	ControllerState := schema.ControllerStateEnd(builder)
-	builder.Finish(ControllerState)
-
-	schema.PlayerInputChangeStart(builder)
-	schema.PlayerInputChangeAddControllerState(builder, ControllerState)
-	schema.PlayerInputChangeAddPlayerIndex(builder, playerInputChange.PlayerIndex)
-	schema.PlayerInputChangeAddDodgeRight(builder, playerInputChange.DodgeRight)
-	schema.PlayerInputChangeAddDodgeForward(builder, playerInputChange.DodgeForward)
-	msg := schema.PlayerInputEnd(builder)
-	builder.Finish(msg)
-
-	schema.MessagePacketStart(builder)
-	schema.MessagePacketAddMessages(builder, msg)
-	msgPack := schema.MessagePacketEnd(builder)
-
-	builder.Finish(msgPack)
-
-	return builder.FinishedBytes()
-}
-
 func (quickChat *QuickChat) marshel() []byte {
 	builder := flatbuffers.NewBuilder(1024)
 	schema.QuickChatStart(builder)
