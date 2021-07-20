@@ -10,6 +10,23 @@ const ( // Dropshot tile info const
 )
 
 const (
+	DataType_TickPacket = iota + 1
+	DataType_FieldInfo
+	DataType_MatchSettings
+	DataType_PlayerInput
+	// Depercated!!!
+	DataType_ActorMapping
+	// Depercated!!!
+	DataType_ComputerId
+	DataType_DesiredGameState
+	DataType_RenderGroup
+	DataType_QuickChat
+	DataType_BallPrediction
+	DataType_ReadyMessage
+	DataType_MessagePacket
+)
+
+const (
 	Information_IGotIt      = 0
 	Information_NeedBoost   = 1
 	Information_TakeTheShot = 2
@@ -94,6 +111,50 @@ const (
 	/// Yeet!
 	Custom_Exclamation_Yeet = 62
 )
+
+type ControllerState struct {
+	/// -1 for full reverse, 1 for full forward
+	Throttle float32
+
+	/// -1 for full left, 1 for full right
+	Steer float32
+
+	/// -1 for nose down, 1 for nose up
+	Pitch float32
+
+	/// -1 for full left, 1 for full right
+	Yaw float32
+
+	/// -1 for roll left, 1 for roll right
+	Roll float32
+
+	/// true if you want to press the jump button
+	Jump bool
+
+	/// true if you want to press the boost button
+	Boost bool
+
+	/// true if you want to press the handbrake button
+	Handbrake bool
+
+	/// true if you want to press the 'use item' button, used in rumble etc.
+	UseItem bool
+}
+
+type PlayerInput struct {
+	PlayerIndex     int32
+	ControllerState ControllerState
+}
+
+type PlayerInputChange struct {
+	PlayerIndex     int32
+	ControllerState ControllerState
+
+	// These are provided by Rocket League, and I'm passing them through. Theoretically they could be
+	// inferred by jump + pitch + roll, but nice to have clarity.
+	DodgeForward float32
+	DodgeRight   float32
+}
 
 type ReadyMessage struct {
 	// If this is set, RLBot will send BallPrediction data back to the client when available.

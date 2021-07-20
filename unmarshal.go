@@ -63,17 +63,17 @@ func (playerInfo *PlayerInfo) unmarshal(flatPlayerInfo *schema.PlayerInfo) {
 	playerInfo.Physics.unmarshal(flatPlayerInfo.Physics(flatPhysics))
 
 	flatBoxShape := &schema.BoxShape{}
-	playerInfo.Hitbox.marshel(flatPlayerInfo.Hitbox(flatBoxShape))
+	playerInfo.Hitbox.unmarshal(flatPlayerInfo.Hitbox(flatBoxShape))
 
 	flatVector3 := &schema.Vector3{}
 	playerInfo.HitboxOffset.unmarshal(flatPlayerInfo.HitboxOffset(flatVector3))
 
 	flatScoreInfo := &schema.ScoreInfo{}
-	playerInfo.ScoreInfo.marshel(flatPlayerInfo.ScoreInfo(flatScoreInfo))
+	playerInfo.ScoreInfo.unmarshal(flatPlayerInfo.ScoreInfo(flatScoreInfo))
 
 }
 
-func (scoreInfo *ScoreInfo) marshel(flatScoreInfo *schema.ScoreInfo) {
+func (scoreInfo *ScoreInfo) unmarshal(flatScoreInfo *schema.ScoreInfo) {
 	scoreInfo.Assists = flatScoreInfo.Assists()
 	scoreInfo.Demolitions = flatScoreInfo.Demolitions()
 	scoreInfo.Goals = flatScoreInfo.Goals()
@@ -83,7 +83,7 @@ func (scoreInfo *ScoreInfo) marshel(flatScoreInfo *schema.ScoreInfo) {
 	scoreInfo.Shots = flatScoreInfo.Shots()
 }
 
-func (boxShape *BoxShape) marshel(flatBoxShape *schema.BoxShape) {
+func (boxShape *BoxShape) unmarshal(flatBoxShape *schema.BoxShape) {
 	boxShape.Height = flatBoxShape.Height()
 	boxShape.Length = flatBoxShape.Length()
 	boxShape.Width = flatBoxShape.Width()
@@ -107,11 +107,11 @@ func (ballInfo *BallInfo) unmarshal(flatBallInfo *schema.BallInfo) {
 	ballInfo.Physics.unmarshal(flatBallInfo.Physics(flatPhysics))
 
 	flatDropShotInfo := &schema.DropShotBallInfo{}
-	ballInfo.DropShotInfo.marshel(flatBallInfo.DropShotInfo(flatDropShotInfo))
+	ballInfo.DropShotInfo.unmarshal(flatBallInfo.DropShotInfo(flatDropShotInfo))
 
 	flatTouch := &schema.Touch{}
 	if flatBallInfo.LatestTouch(flatTouch) != nil {
-		ballInfo.LatestTouch.marshel(flatTouch)
+		ballInfo.LatestTouch.unmarshal(flatTouch)
 	}
 
 	flatShape := &flatbuffers.Table{}
@@ -129,7 +129,7 @@ func (physics *Physics) unmarshal(flatPhysics *schema.Physics) {
 	physics.Rotation.unmarshal(flatPhysics.Rotation(flatRotator))
 }
 
-func (touch *Touch) marshel(flatTouch *schema.Touch) {
+func (touch *Touch) unmarshal(flatTouch *schema.Touch) {
 	touch.GameSeconds = flatTouch.GameSeconds()
 	touch.PlayerIndex = flatTouch.PlayerIndex()
 	touch.PlayerName = string(flatTouch.PlayerName())
@@ -140,7 +140,7 @@ func (touch *Touch) marshel(flatTouch *schema.Touch) {
 	touch.Normal.unmarshal(flatTouch.Normal(flatVector3))
 }
 
-func (dropShotInfo *DropShotBallInfo) marshel(flatDropShotInfo *schema.DropShotBallInfo) {
+func (dropShotInfo *DropShotBallInfo) unmarshal(flatDropShotInfo *schema.DropShotBallInfo) {
 	dropShotInfo.AbsorbedForce = flatDropShotInfo.AbsorbedForce()
 	dropShotInfo.DamageIndex = flatDropShotInfo.DamageIndex()
 	dropShotInfo.ForceAccumRecent = flatDropShotInfo.ForceAccumRecent()

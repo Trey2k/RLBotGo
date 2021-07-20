@@ -13,19 +13,15 @@ import (
 )
 
 type Socket struct {
-	Conn    net.Conn
-	BinBuff *bytes.Buffer
-}
-
-type rlData interface {
-	Marshel() []byte
+	conn    net.Conn
+	binBuff *bytes.Buffer
 }
 
 func InitConnection(port int) (Socket, error) {
 	conn, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 	socket := Socket{
-		Conn:    conn,
-		BinBuff: new(bytes.Buffer),
+		conn:    conn,
+		binBuff: new(bytes.Buffer),
 	}
 	return socket, err
 }
@@ -40,16 +36,16 @@ func (socket *Socket) SendMessage(dataType uint16, data rlData) error {
 	bytes := append([]byte{}, dataTypePayload...)
 	bytes = append(bytes, size...)
 
-	bytes = append(bytes, data.Marshel()...)
+	bytes = append(bytes, data.marshel()...)
 	fmt.Println(bytes)
-	_, err := socket.BinBuff.Write(bytes)
+	_, err := socket.binBuff.Write(bytes)
 	if err != nil {
 		return errors.New("rocket league is gay " + err.Error())
 	}
 
 	// Big Penis In Town
 
-	_, err = socket.Conn.Write(socket.BinBuff.Bytes())
+	_, err = socket.conn.Write(socket.binBuff.Bytes())
 	return err
 }
 
@@ -58,7 +54,7 @@ func (socket *Socket) SetTickHandler(handler func(gameTick *GameTickPacket, sock
 	payload := make([]byte, 4096) //Trey, Change me!
 	for {
 
-		n, err := socket.Conn.Read(payload)
+		n, err := socket.conn.Read(payload)
 		if err != nil && err != io.EOF {
 			return err
 		}
