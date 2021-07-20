@@ -158,14 +158,14 @@ const (
 )
 
 const (
-	/// Restart the match if any match settings differ. This is the default because old RLBot always worked this way.
+	// Restart the match if any match settings differ. This is the default because old RLBot always worked this way.
 	ExistingMatchBehavior_Restart_If_Different = iota
 
-	/// Always restart the match, even if config is identical
+	// Always restart the match, even if config is identical
 	ExistingMatchBehavior_Restart
 
-	/// Never restart an existing match, just try to remove or spawn cars to match the configuration.
-	/// If we are not in the middle of a match, a match will be started. Handy for LAN matches.
+	// Never restart an existing match, just try to remove or spawn cars to match the configuration.
+	// If we are not in the middle of a match, a match will be started. Handy for LAN matches.
 	ExistingMatchBehavior_Continue_And_Spawn
 )
 
@@ -217,87 +217,87 @@ const (
 )
 
 const (
-	Information_IGotIt = iota
-	Information_NeedBoost
-	Information_TakeTheShot
-	Information_Defending
-	Information_GoForIt
-	Information_Centering
-	Information_AllYours
-	Information_InPosition
-	Information_Incoming
-	Compliments_NiceShot
-	Compliments_GreatPass
-	Compliments_Thanks
-	Compliments_WhatASave
-	Compliments_NiceOne
-	Compliments_WhatAPlay
-	Compliments_GreatClear
-	Compliments_NiceBlock
-	Reactions_OMG
-	Reactions_Noooo
-	Reactions_Wow
-	Reactions_CloseOne
-	Reactions_NoWay
-	Reactions_HolyCow
-	Reactions_Whew
-	Reactions_Siiiick
-	Reactions_Calculated
-	Reactions_Savage
-	Reactions_Okay
-	Apologies_Cursing
-	Apologies_NoProblem
-	Apologies_Whoops
-	Apologies_Sorry
-	Apologies_MyBad
-	Apologies_Oops
-	Apologies_MyFault
-	PostGame_Gg
-	PostGame_WellPlayed
-	PostGame_ThatWasFun
-	PostGame_Rematch
-	PostGame_OneMoreGame
-	PostGame_WhatAGame
-	PostGame_NiceMoves
-	PostGame_EverybodyDance
-	/// Custom text chats made by bot makers
-	MaxPysonixQuickChatPresets
-	/// Waste of CPU cycles
-	Custom_Toxic_WasteCPU
-	/// Git gud*
-	Custom_Toxic_GitGut
-	/// De-Allocate Yourself
-	Custom_Toxic_DeAlloc
-	/// 404: Your skill not found
-	Custom_Toxic_404NoSkill
-	/// Get a virus
-	Custom_Toxic_CatchVirus
-	/// Passing!
-	Custom_Useful_Passing
-	/// Faking!
-	Custom_Useful_Faking
-	/// Demoing!
-	Custom_Useful_Demoing
-	/// BOOPING
-	Custom_Useful_Bumping
-	/// The chances of that was 47525 to 1*
-	Custom_Compliments_TinyChances
-	/// Who upped your skill level?
-	Custom_Compliments_SkillLevel
-	/// Your programmer should be proud
-	Custom_Compliments_proud
-	/// You're the GC of Bots
-	Custom_Compliments_GC
-	/// Are you <Insert Pro>Bot? *
-	Custom_Compliments_Pro
-	/// Lag
-	Custom_Excuses_Lag
-	/// Ghost inputs
-	Custom_Excuses_GhostInputs
-	/// RIGGED
-	Custom_Excuses_Rigged
-	/// Mafia plays!
-	Custom_Toxic_MafiaPlays
-	/// Yeet!
-	Custom_Exclamation_Yeet
+	QuickChat_Information_IGotIt = iota
+	QuickChat_Information_NeedBoost
+	QuickChat_Information_TakeTheShot
+	QuickChat_Information_Defending
+	QuickChat_Information_GoForIt
+	QuickChat_Information_Centering
+	QuickChat_Information_AllYours
+	QuickChat_Information_InPosition
+	QuickChat_Information_Incoming
+	QuickChat_Compliments_NiceShot
+	QuickChat_Compliments_GreatPass
+	QuickChat_Compliments_Thanks
+	QuickChat_Compliments_WhatASave
+	QuickChat_Compliments_NiceOne
+	QuickChat_Compliments_WhatAPlay
+	QuickChat_Compliments_GreatClear
+	QuickChat_Compliments_NiceBlock
+	QuickChat_Reactions_OMG
+	QuickChat_Reactions_Noooo
+	QuickChat_Reactions_Wow
+	QuickChat_Reactions_CloseOne
+	QuickChat_Reactions_NoWay
+	QuickChat_Reactions_HolyCow
+	QuickChat_Reactions_Whew
+	QuickChat_Reactions_Siiiick
+	QuickChat_Reactions_Calculated
+	QuickChat_Reactions_Savage
+	QuickChat_Reactions_Okay
+	QuickChat_Apologies_Cursing
+	QuickChat_Apologies_NoProblem
+	QuickChat_Apologies_Whoops
+	QuickChat_Apologies_Sorry
+	QuickChat_Apologies_MyBad
+	QuickChat_Apologies_Oops
+	QuickChat_Apologies_MyFault
+	QuickChat_PostGame_Gg
+	QuickChat_PostGame_WellPlayed
+	QuickChat_PostGame_ThatWasFun
+	QuickChat_PostGame_Rematch
+	QuickChat_PostGame_OneMoreGame
+	QuickChat_PostGame_WhatAGame
+	QuickChat_PostGame_NiceMoves
+	QuickChat_PostGame_EverybodyDance
+	// Custom text chats made by bot makers
+	QuickChat_MaxPysonixQuickChatPresets
+	// Waste of CPU cycles
+	QuickChat_Custom_Toxic_WasteCPU
+	// Git gud*
+	QuickChat_Custom_Toxic_GitGut
+	// De-Allocate Yourself
+	QuickChat_Custom_Toxic_DeAlloc
+	// 404: Your skill not found
+	QuickChat_Custom_Toxic_404NoSkill
+	// Get a virus
+	QuickChat_Custom_Toxic_CatchVirus
+	// Passing!
+	QuickChat_Custom_Useful_Passing
+	// Faking!
+	QuickChat_Custom_Useful_Faking
+	// Demoing!
+	QuickChat_Custom_Useful_Demoing
+	// BOOPING
+	QuickChat_Custom_Useful_Bumping
+	// The chances of that was 47525 to 1*
+	QuickChat_Custom_Compliments_TinyChances
+	// Who upped your skill level?
+	QuickChat_Custom_Compliments_SkillLevel
+	// Your programmer should be proud
+	QuickChat_Custom_Compliments_proud
+	// You're the GC of Bots
+	QuickChat_Custom_Compliments_GC
+	// Are you <Insert Pro>Bot? *
+	QuickChat_Custom_Compliments_Pro
+	// Lag
+	QuickChat_Custom_Excuses_Lag
+	// Ghost inputs
+	QuickChat_Custom_Excuses_GhostInputs
+	// RIGGED
+	QuickChat_Custom_Excuses_Rigged
+	// Mafia plays!
+	QuickChat_Custom_Toxic_MafiaPlays
+	// Yeet!
+	QuickChat_Custom_Exclamation_Yeet
 )
