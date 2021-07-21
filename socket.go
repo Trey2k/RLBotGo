@@ -45,44 +45,48 @@ func (socket *Socket) SendMessage(dataType uint16, data rlData) error {
 
 func (socket *Socket) SetTickHandler(handler func(gameState *GameState, socket *Socket)) error {
 
-	payload := make([]byte, 23504) //Trey, Change me!
+	//payload := make([]byte, 23504) //Trey, Change me!
 	gameState := &GameState{}
 	gameState.MatchSettingsOK = false
 	gameState.FieldInfoOK = false
 	for {
 
-		n, err := socket.conn.Read(payload)
+		data := make([]byte, 4)
+		_, err := io.ReadFull(socket.conn, data)
 		if err != nil && err != io.EOF {
 			return err
 		}
-		if n <= 4 { // Make sure we get a full packet
-			continue
-		}
 
-		dataType := binary.BigEndian.Uint16(payload[:2])
+		dataType := binary.BigEndian.Uint16(data[:2])
+		dataSize := binary.BigEndian.Uint16(data[2:])
+		fmt.Println(dataSize)
+		payload := make([]byte, dataSize)
+		_, err = io.ReadFull(socket.conn, payload)
+		if err != nil && err != io.EOF {
+			return err
+		}
 
 		switch dataType {
 		case DataType_TickPacket:
-			flatGameTick := schema.GetRootAsGameTickPacket(payload, 4)
+			flatGameTick := schema.GetRootAsGameTickPacket(payload, 0)
 			gameState.GameTick = &GameTickPacket{} // Restting to 0 values just in case
 			gameState.GameTick.unmarshal(flatGameTick)
 			handler(gameState, socket)
 		case DataType_FieldInfo:
-			faltFieldInfo := schema.GetRootAsFieldInfo(payload, 4)
+			faltFieldInfo := schema.GetRootAsFieldInfo(payload, 0)
 			gameState.FieldInfoOK = true
 			gameState.FieldInfo.unmarshal(faltFieldInfo)
 		case DataType_MatchSettings:
-			flatMatchSettings := schema.GetRootAsMatchSettings(payload, 4)
+			flatMatchSettings := schema.GetRootAsMatchSettings(payload, 0)
 			gameState.MatchSettingsOK = true
 			gameState.MatchSettigns.unmarshal(flatMatchSettings)
 			// TODO: Figure out why we are not sent MatchSettings
 		case DataType_BallPrediction:
-			flatBallPrediction := schema.GetRootAsBallPrediction(payload, 4)
-			flatPredictionSlice := &schema.PredictionSlice{}
-			flatBallPrediction.Slices(flatPredictionSlice, 0)
-			// gameState.BallPrediction.unmarshal(flatBallPrediction)
+			flatBallPrediction := schema.GetRootAsBallPrediction(payload, 0)
+			if flatBallPrediction.SlicesLength() == 360 {
+				gameState.BallPrediction.unmarshal(flatBallPrediction)
+			}
 			// TODO: Fix Ball predictions, faltbuffers fails GetRootAsBallPrediction for some reason
 		}
 	}
-
 }
