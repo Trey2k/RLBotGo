@@ -1,6 +1,8 @@
 package RLBotGo
 
 import (
+	"fmt"
+
 	schema "github.com/Trey2k/RLBotGo/flat"
 
 	flatbuffers "github.com/google/flatbuffers/go"
@@ -12,7 +14,10 @@ func (gameTickPack *GameTickPacket) unmarshal(flatGameTickPack *schema.GameTickP
 
 	flatBoostPadStats := &schema.BoostPadState{}
 	for i := 0; i < flatGameTickPack.BoostPadStatesLength(); i++ {
-		flatGameTickPack.BoostPadStates(flatBoostPadStats, i)
+		ok := flatGameTickPack.BoostPadStates(flatBoostPadStats, i)
+		if !ok {
+			continue
+		}
 		gameTickPack.BoostPadStates = append(gameTickPack.BoostPadStates, BoostPadState{
 			IsActive: flatBoostPadStats.IsActive() == 1,
 			Timer:    flatBoostPadStats.Timer(),
@@ -23,7 +28,10 @@ func (gameTickPack *GameTickPacket) unmarshal(flatGameTickPack *schema.GameTickP
 
 	flatPlayerInfo := &schema.PlayerInfo{}
 	for i := 0; i < flatGameTickPack.PlayersLength(); i++ {
-		flatGameTickPack.Players(flatPlayerInfo, i)
+		ok := flatGameTickPack.Players(flatPlayerInfo, i)
+		if !ok {
+			continue
+		}
 		var playerInfo PlayerInfo
 		playerInfo.unmarshal(flatPlayerInfo)
 		gameTickPack.Players = append(gameTickPack.Players, playerInfo)
@@ -31,7 +39,10 @@ func (gameTickPack *GameTickPacket) unmarshal(flatGameTickPack *schema.GameTickP
 
 	flatTeamInfo := &schema.TeamInfo{}
 	for i := 0; i < flatGameTickPack.TeamsLength(); i++ {
-		flatGameTickPack.Teams(flatTeamInfo, i)
+		ok := flatGameTickPack.Teams(flatTeamInfo, i)
+		if !ok {
+			continue
+		}
 		gameTickPack.Teams = append(gameTickPack.Teams, TeamInfo{
 			TeamIndex: flatTeamInfo.TeamIndex(),
 			Score:     flatTeamInfo.Score(),
@@ -40,7 +51,10 @@ func (gameTickPack *GameTickPacket) unmarshal(flatGameTickPack *schema.GameTickP
 
 	flatDropShotTile := &schema.DropshotTile{}
 	for i := 0; i < flatGameTickPack.TileInformationLength(); i++ {
-		flatGameTickPack.TileInformation(flatDropShotTile, i)
+		ok := flatGameTickPack.TileInformation(flatDropShotTile, i)
+		if !ok {
+			continue
+		}
 		gameTickPack.TileInformation = append(gameTickPack.TileInformation, DropshotTile{
 			TileState: flatDropShotTile.TileState(),
 		})
@@ -50,10 +64,16 @@ func (gameTickPack *GameTickPacket) unmarshal(flatGameTickPack *schema.GameTickP
 func (fieldInfo *FieldInfo) unmarshal(flatFieldInfo *schema.FieldInfo) {
 	flatBoostPad := &schema.BoostPad{}
 	for i := 0; i < flatFieldInfo.BoostPadsLength(); i++ {
-		flatFieldInfo.BoostPads(flatBoostPad, i)
+		ok := flatFieldInfo.BoostPads(flatBoostPad, i)
+		if !ok {
+			continue
+		}
 		var vec3 Vector3
 		flatVec3 := &schema.Vector3{}
 		vec3.unmarshal(flatBoostPad.Location(flatVec3))
+		if fieldInfo == nil {
+			fmt.Println("FUCCKKKKK")
+		}
 		fieldInfo.BoostPads = append(fieldInfo.BoostPads, BoostPad{
 			Location:    vec3,
 			IsFullBoost: flatBoostPad.IsFullBoost() == 1,
@@ -62,7 +82,10 @@ func (fieldInfo *FieldInfo) unmarshal(flatFieldInfo *schema.FieldInfo) {
 
 	flatGoal := &schema.GoalInfo{}
 	for i := 0; i < flatFieldInfo.GoalsLength(); i++ {
-		flatFieldInfo.Goals(flatGoal, i)
+		ok := flatFieldInfo.Goals(flatGoal, i)
+		if !ok {
+			continue
+		}
 		var location Vector3
 		var direction Vector3
 		flatVec3 := &schema.Vector3{}
@@ -81,10 +104,13 @@ func (fieldInfo *FieldInfo) unmarshal(flatFieldInfo *schema.FieldInfo) {
 func (ballPrediction *BallPrediction) unmarshal(flatBallPrediction *schema.BallPrediction) {
 	flatPredictionSlice := &schema.PredictionSlice{}
 	for i := 0; i < flatBallPrediction.SlicesLength(); i++ {
-		flatBallPrediction.Slices(flatPredictionSlice, i)
+		ok := flatBallPrediction.Slices(flatPredictionSlice, i)
+		if !ok {
+			continue
+		}
 		var physics Physics
-		//flatPhysics := &schema.Physics{}
-		//physics.unmarshal(flatPredictionSlice.Physics(flatPhysics))
+		flatPhysics := &schema.Physics{}
+		physics.unmarshal(flatPredictionSlice.Physics(flatPhysics))
 		ballPrediction.Slices = append(ballPrediction.Slices, PredictionSlice{
 			GameSeconds: flatPredictionSlice.GameSeconds(),
 			Physics:     physics,
@@ -111,7 +137,10 @@ func (matchSettings *MatchSettings) unmarshal(flatMatchSettings *schema.MatchSet
 
 	flatPlayerConfig := &schema.PlayerConfiguration{}
 	for i := 0; i < flatMatchSettings.PlayerConfigurationsLength(); i++ {
-		flatMatchSettings.PlayerConfigurations(flatPlayerConfig, i)
+		ok := flatMatchSettings.PlayerConfigurations(flatPlayerConfig, i)
+		if !ok {
+			continue
+		}
 		temp := PlayerConfiguration{}
 		temp.unmarshal(flatPlayerConfig)
 		matchSettings.PlayerConfigurations = append(matchSettings.PlayerConfigurations, temp)
@@ -161,8 +190,9 @@ func (playerLoadout *PlayerLoadout) unmarshal(flatPlayerLoadout *schema.PlayerLo
 	playerLoadout.TrailsId = flatPlayerLoadout.TrailsId()
 	playerLoadout.GoalExplosionId = flatPlayerLoadout.GoalExplosionId()
 	playerLoadout.LoadoutPaint.unmarshal(flatPlayerLoadout.LoadoutPaint(&schema.LoadoutPaint{}))
-	playerLoadout.PrimaryColorLookup.unmarshal(flatPlayerLoadout.PrimaryColorLookup(&schema.Color{}))
-	playerLoadout.SecondaryColorLookup.unmarshal(flatPlayerLoadout.SecondaryColorLookup(&schema.Color{}))
+	// playerLoadout.PrimaryColorLookup.unmarshal(flatPlayerLoadout.PrimaryColorLookup(&schema.Color{}))
+	// playerLoadout.SecondaryColorLookup.unmarshal(flatPlayerLoadout.SecondaryColorLookup(&schema.Color{}))
+	// TODO: For some reason these 2 fail
 }
 
 func (loadoutPaint *LoadoutPaint) unmarshal(flatLoadoutPaint *schema.LoadoutPaint) {
@@ -261,8 +291,8 @@ func (physics *Physics) unmarshal(flatPhysics *schema.Physics) {
 	physics.AngularVelocity.unmarshal(flatPhysics.AngularVelocity(flatVector3))
 	physics.Velocity.unmarshal(flatPhysics.Velocity(flatVector3))
 
-	flatRotator := &schema.Rotator{}
-	physics.Rotation.unmarshal(flatPhysics.Rotation(flatRotator))
+	//flatRotator := &schema.Rotator{}
+	//physics.Rotation.unmarshal(flatPhysics.Rotation(flatRotator))
 }
 
 func (touch *Touch) unmarshal(flatTouch *schema.Touch) {

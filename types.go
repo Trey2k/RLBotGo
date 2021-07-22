@@ -1,5 +1,6 @@
 package RLBotGo
 
+// GameState the game state struct
 type GameState struct {
 	GameTick       *GameTickPacket
 	BallPrediction *BallPrediction
@@ -10,6 +11,7 @@ type GameState struct {
 	FieldInfoOK     bool
 }
 
+// PredictionSlice ball prediction for a given time
 type PredictionSlice struct {
 	// The moment in game time that this prediction corresponds to.
 	// This corresponds to 'secondsElapsed' in the GameInfo table.
@@ -19,6 +21,8 @@ type PredictionSlice struct {
 	Physics Physics
 }
 
+// BallPrediction Contains a slice of predictions.
+// Expected size is 6 * 60. 6 secounds 60 predictions for every secound
 type BallPrediction struct {
 	// A list of places the ball will be at specific times in the future.
 	// It is guaranteed to sorted so that time increases with each slice.
@@ -26,6 +30,7 @@ type BallPrediction struct {
 	Slices []PredictionSlice
 }
 
+// ControllerState Define the state of a controller
 type ControllerState struct {
 	// -1 for full reverse, 1 for full forward
 	Throttle float32
@@ -55,11 +60,13 @@ type ControllerState struct {
 	UseItem bool
 }
 
+// PlayerInput rlData for a player input
 type PlayerInput struct {
 	PlayerIndex     int32
 	ControllerState ControllerState
 }
 
+// PlayerInputChange information about a players input changing
 type PlayerInputChange struct {
 	PlayerIndex     int32
 	ControllerState ControllerState
@@ -70,11 +77,13 @@ type PlayerInputChange struct {
 	DodgeRight   float32
 }
 
+// PlayerClass A player type and skill level if psy bot
 type PlayerClass struct {
 	Type     int
 	BotSkill float64
 }
 
+// PlayerLoadout The aperance information about a player
 type PlayerLoadout struct {
 	TeamColorId     int32
 	CustomColorId   int32
@@ -98,6 +107,7 @@ type PlayerLoadout struct {
 	SecondaryColorLookup Color
 }
 
+// LoadoutPaint The paint information about a player
 type LoadoutPaint struct {
 	CarPaintId           int32
 	DecalPaintId         int32
@@ -109,6 +119,7 @@ type LoadoutPaint struct {
 	GoalExplosionPaintId int32
 }
 
+// Color color in a RGBA format
 type Color struct {
 	A uint8
 	R uint8
@@ -116,6 +127,7 @@ type Color struct {
 	B uint8
 }
 
+// PlayerConfiguration Information about a given player
 type PlayerConfiguration struct {
 	// Cannot be named 'class' because that breaks Java.
 	// Cannot be named 'playerClass' because that breaks C#.
@@ -128,6 +140,7 @@ type PlayerConfiguration struct {
 	SpawnId int32
 }
 
+// MutatorSettings What mutator settings are set
 type MutatorSettings struct {
 	MatchLength          int8
 	MaxScore             int8
@@ -147,6 +160,7 @@ type MutatorSettings struct {
 	RespawnTimeOption    int8
 }
 
+// MatchSettings The current match settings
 type MatchSettings struct {
 	PlayerConfigurations  []PlayerConfiguration
 	GameMode              int8
@@ -167,6 +181,7 @@ type MatchSettings struct {
 	GameMapUpk string
 }
 
+// GoalInfo where are the goals??
 type GoalInfo struct {
 	TeamNum   int32
 	Location  Vector3
@@ -175,11 +190,13 @@ type GoalInfo struct {
 	Height    float32
 }
 
+// FieldInfo BoostPad and goal info
 type FieldInfo struct {
 	BoostPads []BoostPad // These will be sorted according to (y * 100 + x), and BoostInfo will be provided in the same order.
 	Goals     []GoalInfo
 }
 
+// ReadyMessage rlData for ready message
 type ReadyMessage struct {
 	// If this is set, RLBot will send BallPrediction data back to the client when available.
 	WantsBallPredictions bool
@@ -189,6 +206,7 @@ type ReadyMessage struct {
 	WantsGameMessages bool
 }
 
+// QuickChat rlData for a qucikcaht
 type QuickChat struct {
 	QuickChatSelection int8
 
@@ -203,28 +221,33 @@ type QuickChat struct {
 	TimeStamp float32
 }
 
+// Vector3 Defines a point in space
 type Vector3 struct {
 	X float32
 	Y float32
 	Z float32
 }
 
+// Rotator Defines a rotation
 type Rotator struct {
 	Pitch float32
 	Yaw   float32
 	Roll  float32
 }
 
+// BoxShape Defines a shap of a box
 type BoxShape struct {
 	Length float32
 	Width  float32
 	Height float32
 }
 
+// SphereShape Defines a shape of a sphere
 type SphereShape struct {
 	Diameter float32
 }
 
+// Physics Describes where when and how a thing is
 type Physics struct {
 	Location        Vector3
 	Rotation        Rotator
@@ -232,6 +255,7 @@ type Physics struct {
 	AngularVelocity Vector3
 }
 
+// ScoreInfo score info on a specific player
 type ScoreInfo struct {
 	Score       int32
 	Goals       int32
@@ -242,6 +266,7 @@ type ScoreInfo struct {
 	Demolitions int32
 }
 
+// BoostPadState The state of a given boost pad
 type BoostPadState struct {
 	// True if the boost can be picked up
 	IsActive bool
@@ -250,11 +275,13 @@ type BoostPadState struct {
 	Timer float32
 }
 
+// BoostPad Location and tpye of a boost pad
 type BoostPad struct {
 	Location    Vector3
 	IsFullBoost bool
 }
 
+// Touch Anything you would want to know on a ball touch
 type Touch struct {
 	// The name of the player involved with the touch.
 	PlayerName string
@@ -275,17 +302,20 @@ type Touch struct {
 	PlayerIndex int32
 }
 
+// DropShotBallInfo info on a dropshot ball
 type DropShotBallInfo struct {
 	AbsorbedForce    float32
 	DamageIndex      int32
 	ForceAccumRecent float32
 }
 
+// DropshotTile info on a dropshot tile
 type DropshotTile struct {
 	// The amount of damage the tile has sustained.
 	TileState int8
 }
 
+// BallInfo The physics last touch and etc on the ball
 type BallInfo struct {
 	Physics      Physics
 	LatestTouch  Touch
@@ -293,6 +323,7 @@ type BallInfo struct {
 	Shape        SphereShape
 }
 
+// PlayerInfo Info on a specific player
 type PlayerInfo struct {
 	Physics      Physics
 	ScoreInfo    ScoreInfo
@@ -316,6 +347,7 @@ type PlayerInfo struct {
 	SpawnId int32
 }
 
+// GameInfo info about the game. Alot of these are self explainitory
 type GameInfo struct {
 	SecondsElapsed    float32
 	GameTimeRemaining float32
@@ -338,12 +370,14 @@ type GameInfo struct {
 	FrameNum int32
 }
 
+// TeamInfo Info on a team
 type TeamInfo struct {
 	TeamIndex int32
 	// number of goals scored.
 	Score int32
 }
 
+// GameTickPacket Send every tick and describes the current state of the game
 type GameTickPacket struct {
 	Players         []PlayerInfo
 	BoostPadStates  []BoostPadState
