@@ -27,6 +27,7 @@ Todo
 Here are some things that could use some work in this repository's current state:
 
   * Add support for render groups
+  * Add support for desired game state
   * Add quick chat and game message support
   * Add some (potentially) useful math functions
   * Get #Go channel in [RLBot Discord](https://discord.com/invite/yc643yyd)

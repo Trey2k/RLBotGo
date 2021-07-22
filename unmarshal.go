@@ -1,8 +1,6 @@
 package RLBotGo
 
 import (
-	"fmt"
-
 	schema "github.com/Trey2k/RLBotGo/flat"
 
 	flatbuffers "github.com/google/flatbuffers/go"
@@ -71,9 +69,6 @@ func (fieldInfo *FieldInfo) unmarshal(flatFieldInfo *schema.FieldInfo) {
 		var vec3 Vector3
 		flatVec3 := &schema.Vector3{}
 		vec3.unmarshal(flatBoostPad.Location(flatVec3))
-		if fieldInfo == nil {
-			fmt.Println("FUCCKKKKK")
-		}
 		fieldInfo.BoostPads = append(fieldInfo.BoostPads, BoostPad{
 			Location:    vec3,
 			IsFullBoost: flatBoostPad.IsFullBoost() == 1,
