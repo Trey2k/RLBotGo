@@ -301,3 +301,14 @@ const (
 	// Yeet!
 	QuickChat_Custom_Exclamation_Yeet
 )
+
+const (
+	RenderType_DrawLine2D = iota + 1
+	RenderType_DrawLine3D
+	RenderType_DrawLine2D_3D
+	RenderType_DrawRect2D
+	RenderType_DrawRect3D
+	RenderType_DrawString2D
+	RenderType_DrawString3D
+	RenderType_DrawCenteredRect3D
+)

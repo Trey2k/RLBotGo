@@ -26,8 +26,8 @@ Todo
 
 Here are some things that could use some work in this repository's current state:
 
-  * Add support for render groups
-  * Add support for desired game state
+  * ~~Add support for render groups~~
+  * ~~Add support for desired game state~~
   * Add quick chat and game message support
   * Add some (potentially) useful math functions
   * Get #Go channel in [RLBot Discord](https://discord.com/invite/yc643yyd)
@@ -47,38 +47,49 @@ The suggested starting point for using this library is using the [RLBotGoExample
 
 If you don't start with the example repository, start out with a connection to RLBot:
 ```Go
-	socket, err := RLBot.InitConnection(23234)
+	rlBot, err := RLBot.InitConnection(23234)
 	if err != nil {
 		panic(err)
 	}
 ```
-After that, prepare and send your bot's ready message:
+After that, send your bot's ready message:
 ```Go
-	readyMsg := &RLBot.ReadyMessage{
-		WantsBallPredictions: true,
-		WantsQuickChat:       true,
-		WantsGameMessages:    true,
-	}
-
-	err = socket.SendMessage(RLBot.DataType_ReadyMessage, readyMsg)
+	err = rlBot.SendReadyMessage(true, true, true)
 	if err != nil {
 		panic(err)
 	}
-```
-Call SetTickHandler with the name of your desired callback function:
-```Go
-    socket.SetTickHandler(tick)
-```
-Finally, write a function to handle ticks:
-```Go
-var lastTouch float32
 
-func tick(gameState *RLBot.GameState, socket *RLBot.Socket) {
-	if gameState.GameTick.Ball.LatestTouch.GameSeconds != 0 && gameState.GameTick.Ball.LatestTouch.GameSeconds != lastTouch {
-        fmt.Println("Someone touched the ball!")
+```
+Call SetGetInput with the name of your desired callback function:
+```Go
+    rlBot.SetGetInput(tick)
+```
+Finally, write a function to return the player input every tick:
+```Go
+// getInput takes in a GameState which contains the gameTickPacket, ballPredidctions, fieldInfo and matchSettings
+// it also takes in the RLBot object. And returns a PlayerInput
+func getInput(gameState *RLBot.GameState, rlBot *RLBot.RLBot) *RLBot.PlayerInput {
+	PlayerInput := &RLBot.PlayerInput{}
+	PlayerInput.PlayerIndex = 0
 
+	// Count ball touches up to 10 and on 11 clear the messages and jump
+	wasjustTouched := false
+	if gameState.GameTick.Ball.LatestTouch.GameSeconds != 0 && lastTouch != gameState.GameTick.Ball.LatestTouch.GameSeconds {
+		totalTouches++
 		lastTouch = gameState.GameTick.Ball.LatestTouch.GameSeconds
+		wasjustTouched = true
 	}
+
+	if wasjustTouched && totalTouches <= 10 {
+    // DebugMessage is a helper function to let you quickly get debug text on screen. it will autmaicly place it so text will nto overlap
+		rlBot.DebugMessageAdd(fmt.Sprintf("The ball was touched %d times", totalTouches))
+		PlayerInput.ControllerState.Jump = false
+	} else if wasjustTouched && totalTouches > 10 {
+		rlBot.DebugMessageClear()
+		totalTouches = 0
+		PlayerInput.ControllerState.Jump = true
+	}
+	return PlayerInput
 
 }
 ```

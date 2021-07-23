@@ -9,8 +9,9 @@ import (
 	schema "github.com/Trey2k/RLBotGo/flat"
 )
 
-type Socket struct {
-	conn net.Conn
+type RLBot struct {
+	conn             net.Conn
+	debugRenderGroup *RenderGroup
 }
 
 type payload struct {
@@ -23,18 +24,43 @@ type rlData interface {
 	marshal() []byte
 }
 
+// SendQuickChat This will allow your bot to be toxic. Who dosnt want that?
+func (socket *RLBot) SendQuickChat(botIndex int32, quickChatSelection int8, teamOnly bool) error {
+	quickChat := &QuickChat{
+		QuickChatSelection: quickChatSelection,
+		TeamOnly:           teamOnly,
+		PlayerIndex:        botIndex,
+	}
+	return socket.SendMessage(DataType_QuickChat, quickChat)
+}
+
+// SendReadyMessage() Send the ready message to RLBot
+func (socket *RLBot) SendReadyMessage(wantsBallPredictions, wantsQuickChat, wantsGameMessages bool) error {
+	readyMsg := &ReadyMessage{
+		WantsBallPredictions: wantsBallPredictions,
+		WantsQuickChat:       wantsQuickChat,
+		WantsGameMessages:    wantsGameMessages,
+	}
+	return socket.SendMessage(DataType_ReadyMessage, readyMsg)
+}
+
+// SendDesiredGameState() Send a specific game state. Good for testing
+func (socket *RLBot) SendDesiredGameState(desiredGameState *DesiredGameState) error {
+	return socket.SendMessage(DataType_DesiredGameState, desiredGameState)
+}
+
 // InitConnection(port int) (Socket, error) Initiate the connection to RLBot returns a socket and a error on failure.
 // Default port is 23234
-func InitConnection(port int) (Socket, error) {
+func InitConnection(port int) (*RLBot, error) {
 	conn, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", port))
-	socket := Socket{
+	socket := &RLBot{
 		conn: conn,
 	}
 	return socket, err
 }
 
 // SendMessage(dataType uint16, data rlData) error Send a data payload to RLBot, returns a error on failure
-func (socket *Socket) SendMessage(dataType uint16, data rlData) error {
+func (socket *RLBot) SendMessage(dataType uint16, data rlData) error {
 	dataTypePayload := make([]byte, 2)
 	binary.BigEndian.PutUint16(dataTypePayload, dataType)
 
@@ -52,7 +78,7 @@ func (socket *Socket) SendMessage(dataType uint16, data rlData) error {
 	return err
 }
 
-func (socket *Socket) startReadingBytes(payloadChannel chan *payload) error {
+func (socket *RLBot) startReadingBytes(payloadChannel chan *payload) error {
 	for {
 		dataInfo := make([]byte, 4)
 		_, err := io.ReadFull(socket.conn, dataInfo)
@@ -79,7 +105,7 @@ func (socket *Socket) startReadingBytes(payloadChannel chan *payload) error {
 }
 
 // SetTickHandler(handler func(gameState *GameState, socket *Socket) Set your tick handler function and start listening for gameTickPackets
-func (socket *Socket) SetTickHandler(handler func(gameState *GameState, socket *Socket)) {
+func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBot) *PlayerInput) {
 
 	gameState := &GameState{}
 	gameState.BallPrediction = &BallPrediction{}
@@ -101,7 +127,10 @@ func (socket *Socket) SetTickHandler(handler func(gameState *GameState, socket *
 			flatGameTick := schema.GetRootAsGameTickPacket(payload.data, 0)
 			gameState.GameTick = &GameTickPacket{} // Restting to 0 values just in case
 			gameState.GameTick.unmarshal(flatGameTick)
-			handler(gameState, socket)
+			input := handler(gameState, socket)
+			// Get input from handler and send it
+			fmt.Println(input.ControllerState.Boost, input.PlayerIndex)
+			socket.SendMessage(DataType_PlayerInput, input)
 
 		case DataType_FieldInfo:
 			faltFieldInfo := schema.GetRootAsFieldInfo(payload.data, 0)

@@ -386,3 +386,60 @@ type GameTickPacket struct {
 	TileInformation []DropshotTile
 	Teams           []TeamInfo
 }
+
+type RenderMessage struct {
+	RenderType int8
+	Color      Color
+	/// For 2d renders this only grabs x and y
+	Start Vector3
+	/// For 2d renders this only grabs x and y
+	End Vector3
+	/// Scales the x size of the text/rectangle, is used for rectangles assuming an initial value of 1
+	ScaleX int32
+	/// Scales the y size of the text/rectangle, is used for rectangles assuming an initial value of 1
+	ScaleY int32
+	Text   string
+	/// Rectangles can be filled or just outlines.
+	IsFilled bool
+}
+
+type RenderGroup struct {
+	RenderMessages []RenderMessage
+	/// The id of the render group
+	Id int32
+}
+
+// DesiredBallState The desired ball state for a desired game state
+type DesiredBallState struct {
+	Physics Physics
+}
+
+// DesiredCarState the desired car state for a desired game state
+type DesiredCarState struct {
+	Physics      Physics
+	BoostAmount  float32
+	Jumped       bool
+	DoubleJumped bool
+}
+
+// DesiredBoostState The desired boost state for a desired game state
+type DesiredBoostState struct {
+	RespawnTime float32
+}
+
+// DesiredGameInfoState the desired fam info for a desired game state
+type DesiredGameInfoState struct {
+	WorldGravityZ float32
+	GameSpeed     float32
+	Paused        bool
+	EndMatch      bool
+}
+
+// DesiredGameState Send a desired game state. useful for repeating the same scnerio
+type DesiredGameState struct {
+	BallState       DesiredBallState
+	CarStates       []DesiredCarState
+	BoostStates     []DesiredBoostState
+	GameInfoState   DesiredGameInfoState
+	ConsoleCommands []string
+}
