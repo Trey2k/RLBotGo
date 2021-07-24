@@ -81,7 +81,7 @@ func getInput(gameState *RLBot.GameState, rlBot *RLBot.RLBot) *RLBot.PlayerInput
 	}
 
 	if wasjustTouched && totalTouches <= 10 {
-    // DebugMessage is a helper function to let you quickly get debug text on screen. it will autmaicly place it so text will nto overlap
+    // DebugMessage is a helper function to let you quickly get debug text on screen. it will autmaicly place it so text will not overlap
 		rlBot.DebugMessageAdd(fmt.Sprintf("The ball was touched %d times", totalTouches))
 		PlayerInput.ControllerState.Jump = false
 	} else if wasjustTouched && totalTouches > 10 {
