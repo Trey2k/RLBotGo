@@ -1,5 +1,7 @@
 RLBotGo
 ===========
+[![GoDoc](https://img.shields.io/badge/pkg.go.dev-doc-blue)](http://pkg.go.dev/github.com/Trey2k/RLBotGo)
+
 
 This repository holds a library for making Rocket League bots in Go!
 
