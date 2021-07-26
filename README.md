@@ -1,5 +1,7 @@
 RLBotGo
 ===========
+[![GoDoc](https://img.shields.io/badge/pkg.go.dev-doc-blue)](http://pkg.go.dev/github.com/Trey2k/RLBotGo)
+
 
 This repository holds a library for making Rocket League bots in Go!
 
@@ -28,7 +30,7 @@ Here are some things that could use some work in this repository's current state
 
   * ~~Add support for render groups~~
   * ~~Add support for desired game state~~
-  * Add quick chat and game message support
+  * Add game message support
   * Add some (potentially) useful math functions
   * Get #Go channel in [RLBot Discord](https://discord.com/invite/yc643yyd)
 
