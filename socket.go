@@ -26,7 +26,7 @@ type rlData interface {
 	marshal() []byte
 }
 
-// SendQuickChat This will allow your bot to be toxic. Who dosnt want that?
+// SendQuickChat This will allow your bot to be toxic. Who doesn't want that?
 func (socket *RLBot) SendQuickChat(quickChatSelection int8, teamOnly bool) error {
 
 	quickChat := &QuickChat{
@@ -37,7 +37,7 @@ func (socket *RLBot) SendQuickChat(quickChatSelection int8, teamOnly bool) error
 	return socket.SendMessage(DataType_QuickChat, quickChat)
 }
 
-// SendReadyMessage() Send the ready message to RLBot
+// SendReadyMessage Send the ready message to RLBot
 func (socket *RLBot) SendReadyMessage(wantsBallPredictions, wantsQuickChat, wantsGameMessages bool) error {
 	readyMsg := &ReadyMessage{
 		WantsBallPredictions: wantsBallPredictions,
@@ -47,14 +47,14 @@ func (socket *RLBot) SendReadyMessage(wantsBallPredictions, wantsQuickChat, want
 	return socket.SendMessage(DataType_ReadyMessage, readyMsg)
 }
 
-// SendDesiredGameState() Send a specific game state. Good for testing
+// SendDesiredGameState Send a specific game state. Good for testing
 func (socket *RLBot) SendDesiredGameState(desiredGameState *DesiredGameState) error {
 	return socket.SendMessage(DataType_DesiredGameState, desiredGameState)
 }
 
-// InitConnection(port int) (Socket, error) Initiate the connection to RLBot returns a socket and a error on failure.
+// Connect (port int) (Socket, error) Initiate the connection to RLBot returns a socket and a error on failure.
 // Default port is 23234
-func InitConnection(port int) (*RLBot, error) {
+func Connect(port int) (*RLBot, error) {
 	var index = flag.Int("player-index", 0, "The player index for the bot")
 	// Go has to know about these two otherwise will fail to launch.
 	flag.String("rlbot-version", "0", "RLBot version")
@@ -68,7 +68,7 @@ func InitConnection(port int) (*RLBot, error) {
 	return socket, err
 }
 
-// SendMessage(dataType uint16, data rlData) error Send a data payload to RLBot, returns a error on failure
+// SendMessage (dataType uint16, data rlData) error Send a data payload to RLBot, returns a error on failure
 func (socket *RLBot) SendMessage(dataType uint16, data rlData) error {
 	dataTypePayload := make([]byte, 2)
 	binary.BigEndian.PutUint16(dataTypePayload, dataType)
@@ -87,6 +87,7 @@ func (socket *RLBot) SendMessage(dataType uint16, data rlData) error {
 	return err
 }
 
+// read game data from the RLBot API
 func (socket *RLBot) startReadingBytes(payloadChannel chan *payload) error {
 	for {
 		dataInfo := make([]byte, 4)
@@ -113,7 +114,7 @@ func (socket *RLBot) startReadingBytes(payloadChannel chan *payload) error {
 	}
 }
 
-// SetTickHandler(handler func(gameState *GameState, socket *Socket) Set your tick handler function and start listening for gameTickPackets
+// SetGetInput (handler func(gameState *GameState, socket *Socket) Set your tick handler function and start listening for gameTickPackets
 func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBot) *ControllerState) {
 
 	gameState := &GameState{}
@@ -127,6 +128,7 @@ func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBo
 
 	payloadChan := make(chan *payload, 5) // Makeing a payload channel with a buffer size of 5
 
+	// TODO: handle the error
 	go socket.startReadingBytes(payloadChan) // Start reading packets in go routine and sending them over a channel
 
 	for {
@@ -134,7 +136,7 @@ func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBo
 		switch payload.dataType {
 		case DataType_TickPacket:
 			flatGameTick := schema.GetRootAsGameTickPacket(payload.data, 0)
-			gameState.GameTick = &GameTickPacket{} // Restting to 0 values just in case
+			gameState.GameTick = &GameTickPacket{} // Resetting to 0 values just in case
 			gameState.GameTick.unmarshal(flatGameTick)
 			input := handler(gameState, socket)
 			// Get input from handler and send it
@@ -143,13 +145,14 @@ func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBo
 					PlayerIndex:     socket.PlayerIndex,
 					ControllerState: *input,
 				}
+				// TODO: handle error
 				socket.SendMessage(DataType_PlayerInput, playerInput)
 			}
 
 		case DataType_FieldInfo:
-			faltFieldInfo := schema.GetRootAsFieldInfo(payload.data, 0)
+			flatFieldInfo := schema.GetRootAsFieldInfo(payload.data, 0)
 			gameState.FieldInfoOK = true
-			gameState.FieldInfo.unmarshal(faltFieldInfo)
+			gameState.FieldInfo.unmarshal(flatFieldInfo)
 
 		case DataType_MatchSettings:
 			flatMatchSettings := schema.GetRootAsMatchSettings(payload.data, 0)

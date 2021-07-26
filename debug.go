@@ -1,11 +1,11 @@
 package RLBotGo
 
-func (rlBot *RLBot) DebugMessageAdd(text string) error {
+func (socket *RLBot) DebugMessageAdd(text string) error {
 
-	if rlBot.debugRenderGroup == nil {
-		rlBot.debugRenderGroup = &RenderGroup{Id: 1}
+	if socket.debugRenderGroup == nil {
+		socket.debugRenderGroup = &RenderGroup{Id: 1}
 	}
-	renderGroup := rlBot.debugRenderGroup
+	renderGroup := socket.debugRenderGroup
 
 	var message RenderMessage
 	message.Color = Color{A: 255, R: 46, G: 255, B: 0}
@@ -19,16 +19,16 @@ func (rlBot *RLBot) DebugMessageAdd(text string) error {
 	message.Text = text
 	renderGroup.RenderMessages = append(renderGroup.RenderMessages, message)
 
-	return rlBot.SendMessage(DataType_RenderGroup, rlBot.debugRenderGroup)
+	return socket.SendMessage(DataType_RenderGroup, socket.debugRenderGroup)
 }
 
-func (rlBot *RLBot) DebugMessageClear() error {
-	if rlBot.debugRenderGroup == nil {
-		rlBot.debugRenderGroup = &RenderGroup{Id: 1}
+func (socket *RLBot) DebugMessageClear() error {
+	if socket.debugRenderGroup == nil {
+		socket.debugRenderGroup = &RenderGroup{Id: 1}
 	}
-	renderGroup := rlBot.debugRenderGroup
+	renderGroup := socket.debugRenderGroup
 
 	renderGroup.RenderMessages = []RenderMessage{}
 
-	return rlBot.SendMessage(DataType_RenderGroup, rlBot.debugRenderGroup)
+	return socket.SendMessage(DataType_RenderGroup, socket.debugRenderGroup)
 }
