@@ -115,7 +115,7 @@ func (socket *RLBot) startReadingBytes(payloadChannel chan *payload) error {
 }
 
 // SetGetInput (handler func(gameState *GameState, socket *Socket) Set your tick handler function and start listening for gameTickPackets
-func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBot) *ControllerState) {
+func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBot) *ControllerState) error {
 
 	gameState := &GameState{}
 	gameState.BallPrediction = &BallPrediction{}
@@ -145,8 +145,11 @@ func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBo
 					PlayerIndex:     socket.PlayerIndex,
 					ControllerState: *input,
 				}
-				// TODO: handle error
-				socket.SendMessage(DataType_PlayerInput, playerInput)
+
+				err := socket.SendMessage(DataType_PlayerInput, playerInput)
+				if err != nil {
+					return err
+				}
 			}
 
 		case DataType_FieldInfo:

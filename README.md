@@ -42,7 +42,7 @@ The suggested starting point for using this library is using the [RLBotGoExample
 
 If you don't start with the example repository, start out with a connection to RLBot:
 ```Go
-	rlBot, err := RLBot.InitConnection(23234)
+	rlBot, err := RLBot.Connect(23234)
 	if err != nil {
 		panic(err)
 	}
