@@ -75,7 +75,7 @@ func getInput(gameState *RLBot.GameState, rlBot *RLBot.RLBot) *RLBot.ControllerS
 	}
 
 	if wasjustTouched && totalTouches <= 10 {
-    // DebugMessage is a helper function to let you quickly get debug text on screen. it will autmaicly place it so text will not overlap
+    // DebugMessage is a helper function to let you quickly get debug text on screen. it will automaticaly place it so text will not overlap
 		rlBot.DebugMessageAdd(fmt.Sprintf("The ball was touched %d times", totalTouches))
 		PlayerInput.Jump = false
 	} else if wasjustTouched && totalTouches > 10 {
@@ -129,7 +129,7 @@ In order to use this library, you'll need to install and configure the following
   * Port 23234 availible on your local machine for [RLBot](https://rlbot.org/)
   * A little patience :)
 
-To compile your bot the first thing you will want to do is take a look at the bot folder in the [Example Repo](https://github.com/Trey2k/RLBotGoExample/tree/main/bot). Modify the config files to your liking and make sure you point to the correct executable fie. After that you can simply use `go build ./` and your bot should be built.
+To compile your bot the first thing you will want to do is take a look at the bot folder in the [Example Repo](https://github.com/Trey2k/RLBotGoExample/tree/main/bot). Modify the config files to your liking and make sure you point to the correct executable file. After that you can simply use `go build ./` and your bot should be built.
 
 To add it to RLBot simply click the +Add button in RL Bot GUI and select the folder that contains the bot folder.
 
