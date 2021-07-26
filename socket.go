@@ -129,8 +129,9 @@ func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBo
 			gameState.GameTick.unmarshal(flatGameTick)
 			input := handler(gameState, socket)
 			// Get input from handler and send it
-			fmt.Println(input.ControllerState.Boost, input.PlayerIndex)
-			socket.SendMessage(DataType_PlayerInput, input)
+			if input != nil {
+				socket.SendMessage(DataType_PlayerInput, input)
+			}
 
 		case DataType_FieldInfo:
 			faltFieldInfo := schema.GetRootAsFieldInfo(payload.data, 0)

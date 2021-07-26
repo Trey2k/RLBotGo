@@ -96,6 +96,35 @@ func getInput(gameState *RLBot.GameState, rlBot *RLBot.RLBot) *RLBot.PlayerInput
 
 After that, you should have a functional bot!
 
+Some other useful things:
+```go
+// Sending a quick chat
+// (playerIndex, QuickChatSelection, teamOnly) refer to the godocs or RLBot documentation for all QuickChatSelection types
+rlBot.SendQuickChat(0, RLBot.QuickChat_Custom_Toxic_404NoSkill, false)
+
+// Sending a desired game state
+// view https://pkg.go.dev/github.com/Trey2k/RLBotGo#DesiredGameState for more info
+// Most fields are optional
+desiredState := &RLBot.DesiredGameState{}
+desiredState.BallState.Physics.Velocity = RLBot.Vector3{X: 0, Y: 0, Z: 1000}
+rlBot.SendDesiredGameState(desiredState)
+
+// Getting ball predictions
+// This will be in the gameState sturct that you recive when the getInput callback is called
+func getInput(gameState *RLBot.GameState, rlBot *RLBot.RLBot) *RLBot.PlayerInput {
+	// Loop through all the predictions we have and print the position and predicted time.
+	// There should be a total of 6 * 60 predictions. 60 for every secound and a total of 6 secounds
+	for i := 0; i < len(gameState.BallPrediction.Slices); i++ {
+		prediction := gameState.BallPrediction.Slices[i]
+		fmt.Printf("The ball will be at pos (%f, %f, %f) at %f game time", prediction.Physics.Location.X,
+			prediction.Physics.Location.Y, prediction.Physics.Location.Z, prediction.GameSeconds)
+	}
+	return nil
+}
+
+
+```
+
 Contributing
 ------------
 
