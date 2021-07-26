@@ -15,6 +15,7 @@ Table of Contents:
   * [About](#about)
   * [Todo](#todo)
   * [Usage](#usage)
+  * [Compiling](#compiling)
   * [Contributing](#contributing)
   * [License](#license)
 
@@ -36,14 +37,6 @@ Here are some things that could use some work in this repository's current state
 
 Usage
 ------------
-
-In order to use this library, you'll need to install and configure the following:
-
-  * [Go](https://golang.org) installed and [configured](https://golang.org/doc/install)
-  * [Setup](https://www.youtube.com/watch?v=oXkbizklI2U) [RLBot](https://rlbot.org/)
-  * A copy of [Rocket League](https://www.rocketleague.com/) installed
-  * Port 23234 availible on your local machine for [RLBot](https://rlbot.org/)
-  * A little patience :)
 
 The suggested starting point for using this library is using the [RLBotGoExample](https://github.com/Trey2k/RLBotGoExmaple) repository as a template for your bot.
 
@@ -70,9 +63,8 @@ Finally, write a function to return the player input every tick:
 ```Go
 // getInput takes in a GameState which contains the gameTickPacket, ballPredidctions, fieldInfo and matchSettings
 // it also takes in the RLBot object. And returns a PlayerInput
-func getInput(gameState *RLBot.GameState, rlBot *RLBot.RLBot) *RLBot.PlayerInput {
-	PlayerInput := &RLBot.PlayerInput{}
-	PlayerInput.PlayerIndex = 0
+func getInput(gameState *RLBot.GameState, rlBot *RLBot.RLBot) *RLBot.ControllerState {
+	PlayerInput := &RLBot.ControllerState{}
 
 	// Count ball touches up to 10 and on 11 clear the messages and jump
 	wasjustTouched := false
@@ -85,11 +77,11 @@ func getInput(gameState *RLBot.GameState, rlBot *RLBot.RLBot) *RLBot.PlayerInput
 	if wasjustTouched && totalTouches <= 10 {
     // DebugMessage is a helper function to let you quickly get debug text on screen. it will autmaicly place it so text will not overlap
 		rlBot.DebugMessageAdd(fmt.Sprintf("The ball was touched %d times", totalTouches))
-		PlayerInput.ControllerState.Jump = false
+		PlayerInput.Jump = false
 	} else if wasjustTouched && totalTouches > 10 {
 		rlBot.DebugMessageClear()
 		totalTouches = 0
-		PlayerInput.ControllerState.Jump = true
+		PlayerInput.Jump = true
 	}
 	return PlayerInput
 
@@ -101,8 +93,8 @@ After that, you should have a functional bot!
 Some other useful things:
 ```go
 // Sending a quick chat
-// (playerIndex, QuickChatSelection, teamOnly) refer to the godocs or RLBot documentation for all QuickChatSelection types
-rlBot.SendQuickChat(0, RLBot.QuickChat_Custom_Toxic_404NoSkill, false)
+// (QuickChatSelection, teamOnly) refer to the godocs or RLBot documentation for all QuickChatSelection types
+rlBot.SendQuickChat(RLBot.QuickChat_Custom_Toxic_404NoSkill, false)
 
 // Sending a desired game state
 // view https://pkg.go.dev/github.com/Trey2k/RLBotGo#DesiredGameState for more info
@@ -113,7 +105,7 @@ rlBot.SendDesiredGameState(desiredState)
 
 // Getting ball predictions
 // This will be in the gameState sturct that you recive when the getInput callback is called
-func getInput(gameState *RLBot.GameState, rlBot *RLBot.RLBot) *RLBot.PlayerInput {
+func getInput(gameState *RLBot.GameState, rlBot *RLBot.RLBot) *RLBot.ControllerState {
 	// Loop through all the predictions we have and print the position and predicted time.
 	// There should be a total of 6 * 60 predictions. 60 for every secound and a total of 6 secounds
 	for i := 0; i < len(gameState.BallPrediction.Slices); i++ {
@@ -126,6 +118,22 @@ func getInput(gameState *RLBot.GameState, rlBot *RLBot.RLBot) *RLBot.PlayerInput
 
 
 ```
+
+Compiling
+------------
+In order to use this library, you'll need to install and configure the following:
+
+  * [Go](https://golang.org) installed and [configured](https://golang.org/doc/install) atleast go 1.15
+  * [Setup](https://www.youtube.com/watch?v=oXkbizklI2U) [RLBot](https://rlbot.org/)
+  * A copy of [Rocket League](https://www.rocketleague.com/) installed
+  * Port 23234 availible on your local machine for [RLBot](https://rlbot.org/)
+  * A little patience :)
+
+To compile your bot the first thing you will want to do is take a look at the bot folder in the [Example Repo](https://github.com/Trey2k/RLBotGoExample/tree/main/bot). Modify the config files to your liking and make sure you point to the correct executable fie. After that you can simply use `go build ./` and your bot should be built.
+
+To add it to RLBot simply click the +Add button in RL Bot GUI and select the folder that contains the bot folder.
+
+If sending your bot for a tournament it will probably be easiest to place the exe in the bot/src/ folder. Give the bot folder a more unique(Your bots name) name and zip that folder. Make sure to change the path to the exe in the bot.cfg file as well!
 
 Contributing
 ------------

@@ -2,6 +2,7 @@ package RLBotGo
 
 import (
 	"encoding/binary"
+	"flag"
 	"fmt"
 	"io"
 	"net"
@@ -12,6 +13,7 @@ import (
 type RLBot struct {
 	conn             net.Conn
 	debugRenderGroup *RenderGroup
+	PlayerIndex      int32
 }
 
 type payload struct {
@@ -25,11 +27,12 @@ type rlData interface {
 }
 
 // SendQuickChat This will allow your bot to be toxic. Who dosnt want that?
-func (socket *RLBot) SendQuickChat(botIndex int32, quickChatSelection int8, teamOnly bool) error {
+func (socket *RLBot) SendQuickChat(quickChatSelection int8, teamOnly bool) error {
+
 	quickChat := &QuickChat{
 		QuickChatSelection: quickChatSelection,
 		TeamOnly:           teamOnly,
-		PlayerIndex:        botIndex,
+		PlayerIndex:        socket.PlayerIndex,
 	}
 	return socket.SendMessage(DataType_QuickChat, quickChat)
 }
@@ -52,9 +55,15 @@ func (socket *RLBot) SendDesiredGameState(desiredGameState *DesiredGameState) er
 // InitConnection(port int) (Socket, error) Initiate the connection to RLBot returns a socket and a error on failure.
 // Default port is 23234
 func InitConnection(port int) (*RLBot, error) {
+	var index = flag.Int("player-index", 0, "The player index for the bot")
+	// Go has to know about these two otherwise will fail to launch.
+	flag.String("rlbot-version", "0", "RLBot version")
+	flag.String("rlbot-dll-directory", "0", "RLBot DLL dir")
+	flag.Parse()
 	conn, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 	socket := &RLBot{
-		conn: conn,
+		conn:        conn,
+		PlayerIndex: int32(*index),
 	}
 	return socket, err
 }
@@ -105,7 +114,7 @@ func (socket *RLBot) startReadingBytes(payloadChannel chan *payload) error {
 }
 
 // SetTickHandler(handler func(gameState *GameState, socket *Socket) Set your tick handler function and start listening for gameTickPackets
-func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBot) *PlayerInput) {
+func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBot) *ControllerState) {
 
 	gameState := &GameState{}
 	gameState.BallPrediction = &BallPrediction{}
@@ -130,7 +139,11 @@ func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBo
 			input := handler(gameState, socket)
 			// Get input from handler and send it
 			if input != nil {
-				socket.SendMessage(DataType_PlayerInput, input)
+				playerInput := &PlayerInput{
+					PlayerIndex:     socket.PlayerIndex,
+					ControllerState: *input,
+				}
+				socket.SendMessage(DataType_PlayerInput, playerInput)
 			}
 
 		case DataType_FieldInfo:
