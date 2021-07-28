@@ -5,7 +5,7 @@ type GameState struct {
 	GameTick       *GameTickPacket
 	BallPrediction *BallPrediction
 
-	MatchSettigns   *MatchSettings
+	MatchSettings   *MatchSettings
 	MatchSettingsOK bool
 	FieldInfo       *FieldInfo
 	FieldInfoOK     bool

@@ -88,12 +88,12 @@ func (socket *RLBot) SendMessage(dataType uint16, data rlData) error {
 }
 
 // read game data from the RLBot API
-func (socket *RLBot) startReadingBytes(payloadChannel chan *payload) error {
+func (socket *RLBot) startReadingBytes(payloadChannel chan *payload, errChan chan error) {
 	for {
 		dataInfo := make([]byte, 4)
 		_, err := io.ReadFull(socket.conn, dataInfo)
 		if err != nil && err != io.EOF {
-			return err
+			errChan <- err
 		}
 
 		dataType := binary.BigEndian.Uint16(dataInfo[:2])
@@ -102,7 +102,7 @@ func (socket *RLBot) startReadingBytes(payloadChannel chan *payload) error {
 		data := make([]byte, dataSize)
 		_, err = io.ReadFull(socket.conn, data)
 		if err != nil && err != io.EOF {
-			return err
+			errChan <- err
 		}
 
 		payloadChannel <- &payload{
@@ -121,50 +121,55 @@ func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBo
 	gameState.BallPrediction = &BallPrediction{}
 	gameState.FieldInfo = &FieldInfo{}
 	gameState.GameTick = &GameTickPacket{}
-	gameState.MatchSettigns = &MatchSettings{}
+	gameState.MatchSettings = &MatchSettings{}
 
 	gameState.FieldInfoOK = false
 	gameState.MatchSettingsOK = false
 
 	payloadChan := make(chan *payload, 5) // Makeing a payload channel with a buffer size of 5
+	errChan := make(chan error)
 
-	// TODO: handle the error
-	go socket.startReadingBytes(payloadChan) // Start reading packets in go routine and sending them over a channel
+	go socket.startReadingBytes(payloadChan, errChan) // Start reading packets in go routine and sending them over a channel
 
 	for {
-		payload := <-payloadChan
-		switch payload.dataType {
-		case DataType_TickPacket:
-			flatGameTick := schema.GetRootAsGameTickPacket(payload.data, 0)
-			gameState.GameTick = &GameTickPacket{} // Resetting to 0 values just in case
-			gameState.GameTick.unmarshal(flatGameTick)
-			input := handler(gameState, socket)
-			// Get input from handler and send it
-			if input != nil {
-				playerInput := &PlayerInput{
-					PlayerIndex:     socket.PlayerIndex,
-					ControllerState: *input,
+		select {
+		case err := <-errChan: // Check for a error every loop
+			return err
+		default:
+			payload := <-payloadChan // Hold until we get a payload
+			switch payload.dataType {
+			case DataType_TickPacket:
+				flatGameTick := schema.GetRootAsGameTickPacket(payload.data, 0)
+				gameState.GameTick = &GameTickPacket{} // Resetting to 0 values just in case
+				gameState.GameTick.unmarshal(flatGameTick)
+				input := handler(gameState, socket)
+				// Get input from handler and send it
+				if input != nil {
+					playerInput := &PlayerInput{
+						PlayerIndex:     socket.PlayerIndex,
+						ControllerState: *input,
+					}
+
+					err := socket.SendMessage(DataType_PlayerInput, playerInput)
+					if err != nil {
+						return err
+					}
 				}
 
-				err := socket.SendMessage(DataType_PlayerInput, playerInput)
-				if err != nil {
-					return err
-				}
+			case DataType_FieldInfo:
+				flatFieldInfo := schema.GetRootAsFieldInfo(payload.data, 0)
+				gameState.FieldInfoOK = true
+				gameState.FieldInfo.unmarshal(flatFieldInfo)
+
+			case DataType_MatchSettings:
+				flatMatchSettings := schema.GetRootAsMatchSettings(payload.data, 0)
+				gameState.MatchSettingsOK = true
+				gameState.MatchSettings.unmarshal(flatMatchSettings)
+
+			case DataType_BallPrediction:
+				flatBallPrediction := schema.GetRootAsBallPrediction(payload.data, 0)
+				gameState.BallPrediction.unmarshal(flatBallPrediction)
 			}
-
-		case DataType_FieldInfo:
-			flatFieldInfo := schema.GetRootAsFieldInfo(payload.data, 0)
-			gameState.FieldInfoOK = true
-			gameState.FieldInfo.unmarshal(flatFieldInfo)
-
-		case DataType_MatchSettings:
-			flatMatchSettings := schema.GetRootAsMatchSettings(payload.data, 0)
-			gameState.MatchSettingsOK = true
-			gameState.MatchSettigns.unmarshal(flatMatchSettings)
-
-		case DataType_BallPrediction:
-			flatBallPrediction := schema.GetRootAsBallPrediction(payload.data, 0)
-			gameState.BallPrediction.unmarshal(flatBallPrediction)
 		}
 	}
 }
