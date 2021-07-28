@@ -94,6 +94,7 @@ func (socket *RLBot) startReadingBytes(payloadChannel chan *payload, errChan cha
 		_, err := io.ReadFull(socket.conn, dataInfo)
 		if err != nil && err != io.EOF {
 			errChan <- err
+			break
 		}
 
 		dataType := binary.BigEndian.Uint16(dataInfo[:2])
@@ -103,6 +104,7 @@ func (socket *RLBot) startReadingBytes(payloadChannel chan *payload, errChan cha
 		_, err = io.ReadFull(socket.conn, data)
 		if err != nil && err != io.EOF {
 			errChan <- err
+			break
 		}
 
 		payloadChannel <- &payload{
