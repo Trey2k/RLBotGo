@@ -286,8 +286,8 @@ func (physics *Physics) unmarshal(flatPhysics *schema.Physics) {
 	physics.AngularVelocity.unmarshal(flatPhysics.AngularVelocity(flatVector3))
 	physics.Velocity.unmarshal(flatPhysics.Velocity(flatVector3))
 
-	//flatRotator := &schema.Rotator{}
-	//physics.Rotation.unmarshal(flatPhysics.Rotation(flatRotator))
+	flatRotator := &schema.Rotator{}
+	physics.Rotation.unmarshal(flatPhysics.Rotation(flatRotator))
 }
 
 func (touch *Touch) unmarshal(flatTouch *schema.Touch) {
@@ -314,7 +314,10 @@ func (vector3 *Vector3) unmarshal(flatVector3 *schema.Vector3) {
 }
 
 func (rotator *Rotator) unmarshal(flatRotator *schema.Rotator) {
-	rotator.Pitch = flatRotator.Pitch()
-	rotator.Yaw = flatRotator.Yaw()
-	rotator.Roll = flatRotator.Roll()
+	if flatRotator != nil {
+		rotator.Pitch = flatRotator.Pitch()
+		rotator.Yaw = flatRotator.Yaw()
+		rotator.Roll = flatRotator.Roll()
+	}
+
 }
