@@ -13,7 +13,7 @@ It provides:
 Table of Contents:
 
   * [About](#about)
-  * [GoBots](#GoBots)
+  * [GoBots](#gobots)
   * [Todo](#todo)
   * [Usage](#usage)
   * [Compiling](#compiling)
@@ -23,7 +23,8 @@ Table of Contents:
 GoBots
 ---
 Here is a list of public bots made using the RLBotGo package.
-[ATBA](https://github.com/xonmello/RLBotGoATTB) or Always Towards Ball Agent made by @xonmello
+* [ATBA](https://github.com/xonmello/RLBotGoATTB) or Always Towards Ball Agent made by [@xonmello](https://github.com/xonmello)
+* [Bot Koba](https://github.com/xonmello/BotKoba) made by [@xonmello](https://github.com/xonmello)
 
 About
 -----
@@ -39,7 +40,7 @@ Here are some things that could use some work in this repository's current state
   * ~~Add support for desired game state~~
   * Add game message support
   * Add some (potentially) useful math functions
-  * ~~Get #Go channel in [RLBot Discord](https://discord.com/invite/yc643yyd)
+  * ~~Get #Go channel in [RLBot Discord](https://discord.com/invite/yc643yyd)~~
 
 Usage
 ------------
