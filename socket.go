@@ -124,7 +124,9 @@ func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBo
 	gameState.FieldInfo = &FieldInfo{}
 	gameState.GameTick = &GameTickPacket{}
 	gameState.MatchSettings = &MatchSettings{}
+	gameState.GameMessage = &GameMessagePacket{}
 
+	gameState.GameMessageOK = false
 	gameState.FieldInfoOK = false
 	gameState.MatchSettingsOK = false
 
@@ -157,6 +159,11 @@ func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBo
 						return err
 					}
 				}
+				// Reset game message Ok to false
+				if gameState.GameMessageOK {
+					gameState.GameMessageOK = false
+					gameState.GameMessage = &GameMessagePacket{}
+				}
 
 			case DataType_FieldInfo:
 				flatFieldInfo := schema.GetRootAsFieldInfo(payload.data, 0)
@@ -171,6 +178,10 @@ func (socket *RLBot) SetGetInput(handler func(gameState *GameState, socket *RLBo
 			case DataType_BallPrediction:
 				flatBallPrediction := schema.GetRootAsBallPrediction(payload.data, 0)
 				gameState.BallPrediction.unmarshal(flatBallPrediction)
+			case DataType_MessagePacket:
+				flatMessagePacket := schema.GetRootAsMessagePacket(payload.data, 0)
+				gameState.GameMessageOK = true
+				gameState.GameMessage.unmarshal(flatMessagePacket)
 			}
 		}
 	}

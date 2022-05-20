@@ -319,5 +319,82 @@ func (rotator *Rotator) unmarshal(flatRotator *schema.Rotator) {
 		rotator.Yaw = flatRotator.Yaw()
 		rotator.Roll = flatRotator.Roll()
 	}
+}
 
+func (message *GameMessagePacket) unmarshal(flatMessage *schema.MessagePacket) {
+	message.FrameNum = flatMessage.FrameNum()
+	message.GameSecounds = flatMessage.GameSeconds()
+	for i := 0; i < flatMessage.MessagesLength(); i++ {
+		var gameMsgWrapper schema.GameMessageWrapper
+		flatMessage.Messages(&gameMsgWrapper, i)
+		msgType := gameMsgWrapper.MessageType()
+		switch msgType {
+		case schema.GameMessagePlayerInputChange:
+			playerInputChange := &PlayerInputChange{}
+			playerInputChange.unmarshal(&gameMsgWrapper)
+			message.Messages = append(message.Messages, GameMessageStruct{
+				GameMessageType:   GamesMessageType_PlayerInputChange,
+				PlayerInputChange: playerInputChange,
+			})
+		case schema.GameMessagePlayerSpectate:
+			playerSpectate := &PlayerSpectate{}
+			playerSpectate.unmarshal(&gameMsgWrapper)
+			message.Messages = append(message.Messages, GameMessageStruct{
+				GameMessageType: GamesMessageType_PlayerSpectate,
+				PlayerSpectate:  playerSpectate,
+			})
+		case schema.GameMessagePlayerStatEvent:
+			playerState := &PlayerStatEvent{}
+			playerState.unmarshal(&gameMsgWrapper)
+			message.Messages = append(message.Messages, GameMessageStruct{
+				GameMessageType: GamesMessageType_PlayerStatEvent,
+				PlayerStatEvent: playerState,
+			})
+
+		}
+	}
+
+}
+
+func (playerInputChange *PlayerInputChange) unmarshal(gameMsgWrapper *schema.GameMessageWrapper) {
+	var schemaPlayerInputChange schema.PlayerInputChange
+	unionTable := new(flatbuffers.Table)
+	if gameMsgWrapper.Message(unionTable) {
+		schemaPlayerInputChange.Init(unionTable.Bytes, unionTable.Pos)
+		playerInputChange.PlayerIndex = schemaPlayerInputChange.PlayerIndex()
+		var flatControlerState schema.ControllerState
+		schemaPlayerInputChange.ControllerState(&flatControlerState)
+		playerInputChange.ControllerState = ControllerState{
+			Throttle:  flatControlerState.Throttle(),
+			Steer:     flatControlerState.Steer(),
+			Pitch:     flatControlerState.Pitch(),
+			Yaw:       flatControlerState.Yaw(),
+			Roll:      flatControlerState.Roll(),
+			Jump:      flatControlerState.Jump() == 1,
+			Boost:     flatControlerState.Boost() == 1,
+			Handbrake: flatControlerState.Handbrake() == 1,
+			UseItem:   flatControlerState.UseItem() == 1,
+		}
+		playerInputChange.DodgeForward = schemaPlayerInputChange.DodgeForward()
+		playerInputChange.DodgeRight = schemaPlayerInputChange.DodgeRight()
+	}
+}
+
+func (playerSpectate *PlayerSpectate) unmarshal(gameMsgWrapper *schema.GameMessageWrapper) {
+	var schemaPlayerSpectate schema.PlayerSpectate
+	unionTable := new(flatbuffers.Table)
+	if gameMsgWrapper.Message(unionTable) {
+		schemaPlayerSpectate.Init(unionTable.Bytes, unionTable.Pos)
+		playerSpectate.PlayerIndex = schemaPlayerSpectate.PlayerIndex()
+	}
+}
+
+func (playerState *PlayerStatEvent) unmarshal(gameMsgWrapper *schema.GameMessageWrapper) {
+	var schemaPlayerState schema.PlayerStatEvent
+	unionTable := new(flatbuffers.Table)
+	if gameMsgWrapper.Message(unionTable) {
+		schemaPlayerState.Init(unionTable.Bytes, unionTable.Pos)
+		playerState.PlayerIndex = schemaPlayerState.PlayerIndex()
+		playerState.StatType = string(schemaPlayerState.StatType())
+	}
 }

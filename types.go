@@ -9,6 +9,9 @@ type GameState struct {
 	MatchSettingsOK bool
 	FieldInfo       *FieldInfo
 	FieldInfoOK     bool
+
+	GameMessage   *GameMessagePacket
+	GameMessageOK bool
 }
 
 // PredictionSlice ball prediction for a given time
@@ -75,6 +78,40 @@ type PlayerInputChange struct {
 	// inferred by jump + pitch + roll, but nice to have clarity.
 	DodgeForward float32
 	DodgeRight   float32
+}
+
+/// Notification that a player triggers some in-game event, such as:
+///		Win, Loss, TimePlayed;
+///		Shot, Assist, Center, Clear, PoolShot;
+///		Goal, AerialGoal, BicycleGoal, BulletGoal, BackwardsGoal, LongGoal, OvertimeGoal, TurtleGoal;
+///		AerialHit, BicycleHit, BulletHit, JuggleHit, FirstTouch, BallHit;
+///		Save, EpicSave, FreezeSave;
+///		HatTrick, Savior, Playmaker, MVP;
+///		FastestGoal, SlowestGoal, FurthestGoal, OwnGoal;
+///		MostBallTouches, FewestBallTouches, MostBoostPickups, FewestBoostPickups, BoostPickups;
+///		CarTouches, Demolition, Demolish;
+///		LowFive, HighFive;
+type PlayerStatEvent struct {
+	PlayerIndex int32
+	StatType    string
+}
+
+/// Notification when the local player is spectating another player.
+type PlayerSpectate struct {
+	PlayerIndex int32
+}
+
+type GameMessageStruct struct {
+	GameMessageType   int
+	PlayerStatEvent   *PlayerStatEvent
+	PlayerSpectate    *PlayerSpectate
+	PlayerInputChange *PlayerInputChange
+}
+
+type GameMessagePacket struct {
+	Messages     []GameMessageStruct
+	GameSecounds float32
+	FrameNum     int32
 }
 
 // PlayerClass A player type and skill level if psy bot

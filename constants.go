@@ -312,3 +312,9 @@ const (
 	RenderType_DrawString3D
 	RenderType_DrawCenteredRect3D
 )
+
+const (
+	GamesMessageType_PlayerStatEvent = iota
+	GamesMessageType_PlayerSpectate
+	GamesMessageType_PlayerInputChange
+)
